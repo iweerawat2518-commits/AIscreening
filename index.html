@@ -1,1244 +1,1467 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DM/HT Smart Management Dashboard</title>
-    <!-- Tailwind CSS -->
+    <title>DM/HT Smart Screening · รพ.สต.บึงเนียม</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f0fdf4; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .nav-active { background-color: #059669; color: white; }
-        .nav-item:hover:not(.nav-active) { background-color: #d1fae5; color: #065f46; }
-        
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #059669; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        
-        /* Custom Scrollbar for Modals */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c084fc; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a855f7; }
+        :root {
+            --bg-primary: #f0f4ff;
+            --bg-secondary: #ffffff;
+            --sidebar-bg: #0a1628;
+            --sidebar-accent: #1e3a5f;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --gold: #c9a84c;
+            --gold-light: #f0d080;
+            --blue-deep: #1e40af;
+            --blue-mid: #2563eb;
+            --blue-light: #dbeafe;
+            --glass-bg: rgba(255,255,255,0.85);
+            --glass-border: rgba(255,255,255,0.6);
+            --shadow: 0 8px 32px rgba(30,64,175,0.12);
+            --card-bg: rgba(255,255,255,0.92);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #060d1a;
+            --bg-secondary: #0d1b2e;
+            --sidebar-bg: #030813;
+            --sidebar-accent: #0d1b2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --glass-bg: rgba(13,27,46,0.85);
+            --glass-border: rgba(255,255,255,0.08);
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --card-bg: rgba(13,27,46,0.92);
+        }
+
+        * { transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease; }
+        body { font-family: 'Prompt', sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; overflow: hidden; }
+
+        /* Animated background */
+        .bg-animated {
+            background: var(--bg-primary);
+            position: relative;
+        }
+        [data-theme="light"] .bg-animated::before {
+            content: '';
+            position: fixed;
+            top: -30%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        [data-theme="dark"] .bg-animated::before {
+            background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
+        }
+
+        /* Sidebar */
+        aside {
+            background: var(--sidebar-bg);
+            width: 260px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+        }
+        aside::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        aside::after {
+            content: '';
+            position: absolute;
+            bottom: 80px;
+            right: -40px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(201,168,76,0.2);
+            position: relative;
+        }
+        .logo-icon-wrap {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #c9a84c, #f0d080);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(201,168,76,0.4);
+            margin-bottom: 12px;
+        }
+        .logo-title { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
+        .logo-sub { font-size: 10px; color: rgba(201,168,76,0.8); letter-spacing: 0.05em; }
+
+        nav.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section-label {
+            font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.3); text-transform: uppercase;
+            padding: 12px 12px 6px;
+        }
+        .nav-btn {
+            width: 100%; display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; border-radius: 10px; margin-bottom: 2px;
+            font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55);
+            cursor: pointer; border: none; background: transparent;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+        .nav-btn.active {
+            background: linear-gradient(135deg, rgba(37,99,235,0.5), rgba(30,58,95,0.6));
+            color: #fff;
+            border: 1px solid rgba(201,168,76,0.3);
+            box-shadow: 0 4px 15px rgba(37,99,235,0.2);
+        }
+        .nav-btn.active .nav-icon { color: var(--gold); }
+        .nav-icon { width: 18px; text-align: center; font-size: 14px; }
+
+        .nav-btn.danger.active { background: linear-gradient(135deg, rgba(220,38,38,0.4), rgba(127,29,29,0.5)); border-color: rgba(252,165,165,0.3); }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            position: relative; z-index: 1;
+        }
+        .login-btn-sidebar {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px; border-radius: 10px;
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+            border: 1px solid rgba(201,168,76,0.3);
+            box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+        }
+        .login-btn-sidebar:hover { box-shadow: 0 4px 20px rgba(37,99,235,0.5); transform: translateY(-1px); }
+        .version-badge { text-align: center; font-size: 9px; color: rgba(255,255,255,0.2); margin-top: 8px; letter-spacing: 0.05em; }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            position: relative; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(30,64,175,0.18); }
+        .kpi-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .kpi-card.blue::before { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+        .kpi-card.gold::before { background: linear-gradient(90deg, #c9a84c, #f0d080); }
+        .kpi-card.red::before { background: linear-gradient(90deg, #dc2626, #f87171); }
+        .kpi-card.green::before { background: linear-gradient(90deg, #059669, #34d399); }
+        .kpi-card.purple::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+        .kpi-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        .kpi-trend { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+        /* Form */
+        .form-section { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 20px; }
+        .form-section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .field-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; display: block; }
+        .field-input {
+            width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-family: 'Prompt', sans-serif;
+            border: 1.5px solid rgba(37,99,235,0.15);
+            background: var(--bg-secondary); color: var(--text-primary);
+            outline: none; transition: all 0.2s;
+        }
+        .field-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        [data-theme="dark"] .field-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .field-input[readonly] { background: rgba(37,99,235,0.05); color: var(--text-secondary); cursor: not-allowed; }
+
+        .submit-btn {
+            width: 100%; padding: 15px; border-radius: 14px; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white; font-size: 15px; font-weight: 700; font-family: 'Prompt', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+            transition: all 0.2s;
+            position: relative; overflow: hidden;
+        }
+        .submit-btn::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+        .submit-btn:hover::before { left: 100%; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37,99,235,0.5); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.3); border-radius: 10px; }
+
+        /* Loading */
+        #loading-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(6,13,26,0.7); backdrop-filter: blur(8px);
+            justify-content: center; align-items: center; flex-direction: column; gap: 16px;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid rgba(201,168,76,0.2);
+            border-top-color: #c9a84c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Pulse glow */
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 8px rgba(201,168,76,0.3); }
+            50% { box-shadow: 0 0 20px rgba(201,168,76,0.6), 0 0 40px rgba(201,168,76,0.2); }
+        }
+
+        /* Chart container */
+        .chart-wrap { position: relative; height: 200px; }
+
+        /* Risk badge */
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-high { background: rgba(220,38,38,0.1); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+        .badge-med { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+        .badge-low { background: rgba(5,150,105,0.1); color: #059669; border: 1px solid rgba(5,150,105,0.2); }
+
+        /* Table */
+        .data-table { width: 100%; font-size: 12px; }
+        .data-table th { padding: 10px 14px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); border-bottom: 1px solid var(--glass-border); }
+        .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); }
+        .data-table tr:hover td { background: rgba(37,99,235,0.03); }
+        .data-table tr:last-child td { border-bottom: none; }
+
+        /* Chatbot */
+        .chat-bubble-user { background: linear-gradient(135deg, #1e40af, #2563eb); color: white; padding: 12px 16px; border-radius: 18px 18px 4px 18px; font-size: 13px; max-width: 80%; }
+        .chat-bubble-ai { background: var(--card-bg); border: 1px solid var(--glass-border); padding: 14px 16px; border-radius: 18px 18px 18px 4px; font-size: 13px; max-width: 80%; color: var(--text-primary); }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,13,26,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 20px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.3); overflow: hidden; }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            width: 44px; height: 24px; background: rgba(255,255,255,0.15); border-radius: 12px;
+            position: relative; cursor: pointer; transition: background 0.3s;
+        }
+        .theme-toggle::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 18px; height: 18px; background: white; border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        [data-theme="dark"] .theme-toggle { background: rgba(201,168,76,0.4); }
+        [data-theme="dark"] .theme-toggle::after { transform: translateX(20px); background: var(--gold); }
+
+        /* Status dot */
+        .status-dot { width: 7px; height: 7px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px #10b981; animation: blink 2s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            aside { position: fixed; left: -260px; z-index: 50; transition: left 0.3s; height: 100%; }
+            aside.mobile-open { left: 0; }
+            .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+            .mobile-overlay.active { display: block; }
+        }
+
+        /* Smooth view transitions */
+        .view-section { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Gold divider */
+        .gold-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent); margin: 16px 0; }
+
+        /* Checkbox custom */
+        .food-checkbox { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1.5px solid rgba(37,99,235,0.12); cursor: pointer; font-size: 12px; transition: all 0.15s; }
+        .food-checkbox:hover { border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.04); }
+        .food-checkbox input:checked + span { color: #2563eb; }
+
+        /* Scrollable modal */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.3); border-radius: 4px; }
     </style>
 </head>
-<body class="text-gray-800 h-screen flex overflow-hidden">
+<body class="bg-animated">
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="flex">
-        <div class="loader mb-4"></div>
-        <p class="text-emerald-700 font-semibold" id="loading-text">กำลังประมวลผลข้อมูล...</p>
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" style="display:none; flex-direction:column; align-items:center; gap:16px; position:fixed; inset:0; z-index:9999; background:rgba(6,13,26,0.7); backdrop-filter:blur(8px); justify-content:center;">
+    <div class="spinner"></div>
+    <p style="color:#c9a84c; font-size:14px; font-weight:500;" id="loading-text">กำลังประมวลผล...</p>
+</div>
+
+<!-- ═══════════════════════════════════════ SIDEBAR ═══════════════════════════════════════ -->
+<aside id="sidebar">
+    <div class="sidebar-logo">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+            <div class="logo-icon-wrap pulse-glow">
+                <i class="fa-solid fa-heart-pulse" style="color:#0a1628; font-size:20px;"></i>
+            </div>
+            <div>
+                <div class="logo-title">รพ.สต. บึงเนียม</div>
+                <div class="logo-sub">SMART HEALTH · บึงเนียม</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
+            <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.4);">
+                <span class="status-dot"></span> ระบบออนไลน์
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-sun" style="font-size:10px; color:rgba(255,255,255,0.3);"></i>
+                <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle"></div>
+                <i class="fa-solid fa-moon" style="font-size:10px; color:rgba(255,255,255,0.3);"></i>
+            </div>
+        </div>
     </div>
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-xl flex-shrink-0 hidden md:flex flex-col h-full z-20">
-        <div class="p-6 bg-emerald-600 text-white rounded-br-3xl flex items-center gap-3">
-            <i class="fa-solid fa-heart-pulse text-2xl"></i>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">เมนูหลัก</div>
+        <button class="nav-btn active" id="btn-form" onclick="switchTab('form')">
+            <span class="nav-icon"><i class="fa-solid fa-file-medical"></i></span> บันทึกคัดกรอง
+        </button>
+        <button class="nav-btn" id="btn-dashboard" onclick="switchTab('dashboard')">
+            <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Dashboard
+        </button>
+
+        <div class="gold-divider"></div>
+        <div class="nav-section-label">ข้อมูลผู้ป่วย</div>
+        <button class="nav-btn hidden restricted-feature danger" id="btn-highrisk" onclick="switchTab('highrisk')">
+            <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i></span> กลุ่มเสี่ยงสูง
+        </button>
+        <button class="nav-btn hidden restricted-feature" id="btn-patients" onclick="switchTab('patients')">
+            <span class="nav-icon"><i class="fa-solid fa-users"></i></span> รายชื่อผู้ป่วยทั้งหมด
+        </button>
+
+        <div class="gold-divider"></div>
+        <div class="nav-section-label">AI & เครื่องมือ</div>
+        <button class="nav-btn" id="btn-chatbot" onclick="switchTab('chatbot')">
+            <span class="nav-icon"><i class="fa-solid fa-robot" style="color:#a78bfa;"></i></span> AI ผู้ช่วยสุขภาพ
+        </button>
+        <button class="nav-btn hidden restricted-feature" id="btn-test-line" onclick="testLineNotify()">
+            <span class="nav-icon"><i class="fa-brands fa-line" style="color:#4ade80;"></i></span> ทดสอบส่ง LINE
+        </button>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button class="login-btn-sidebar" id="btn-login" onclick="openLoginModal()">
+            <i class="fa-solid fa-shield-halved"></i> เจ้าหน้าที่เข้าสู่ระบบ
+        </button>
+        <div class="version-badge">v2.0 · Powered by Gemini AI</div>
+    </div>
+</aside>
+
+<!-- ═══════════════════════════════════════ MAIN ═══════════════════════════════════════ -->
+<main style="flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; position:relative; z-index:1;">
+    
+    <!-- Top Bar -->
+    <header style="padding: 16px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid var(--glass-border); background: var(--glass-bg); backdrop-filter:blur(20px); flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:14px;">
+            <button onclick="openMobileMenu()" style="display:none; background:none; border:none; color:var(--text-primary); font-size:18px; cursor:pointer;" id="hamburger">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div>
-                <h1 class="text-lg font-bold leading-tight">รพ.สต.บึงเนียม Smart</h1>
-                <p class="text-xs text-emerald-100">DM/HT Management</p>
+                <div id="page-title" style="font-size:16px; font-weight:700; color:var(--text-primary);">บันทึกคัดกรองสุขภาพ</div>
+                <div style="font-size:11px; color:var(--text-secondary);" id="page-sub">กรอกข้อมูลเพื่อให้ AI วิเคราะห์ผลทันที</div>
             </div>
         </div>
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <button onclick="switchTab('form')" id="btn-form" class="w-full text-left px-4 py-3 rounded-lg nav-active font-medium transition-all flex items-center gap-3">
-                <i class="fa-solid fa-user-plus w-5"></i> บันทึกข้อมูล
-            </button>
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-gray-600 flex items-center gap-3">
-                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
-            </button>
-            
-            <button onclick="switchTab('highrisk')" id="btn-highrisk" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-gray-600 flex items-center gap-3 hidden restricted-feature">
-                <i class="fa-solid fa-triangle-exclamation w-5 text-red-500"></i> กลุ่มเสี่ยงสูง สงสัยป่วย
-            </button>
-            <button onclick="switchTab('patients')" id="btn-patients" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-gray-600 flex items-center gap-3 hidden restricted-feature">
-                <i class="fa-solid fa-users w-5 text-blue-500"></i> รายชื่อผู้ป่วยทั้งหมด
-            </button>
-
-            <div class="border-t border-gray-200 my-4 pt-4">
-                <p class="px-4 text-xs font-semibold text-gray-400 mb-2 uppercase">AI & เครื่องมือ</p>
-                <button onclick="switchTab('chatbot')" id="btn-chatbot" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-purple-600 flex items-center gap-3">
-                    <i class="fa-solid fa-robot w-5"></i> ผู้ช่วยสุขภาพอัจฉริยะ AI
-                </button>
-                <button onclick="testLineNotify()" id="btn-test-line" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-green-600 flex items-center gap-3 hidden restricted-feature">
-                    <i class="fa-brands fa-line w-5"></i> ทดสอบส่ง LINE
-                </button>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="text-align:right; display:none;" id="user-badge">
+                <div style="font-size:11px; color:var(--gold); font-weight:600;">Admin Access</div>
+                <div style="font-size:10px; color:var(--text-secondary);">รพ.สต.บึงเนียม</div>
             </div>
-            <button onclick="openLoginModal()" id="btn-login" class="w-full text-left px-4 py-3 rounded-lg nav-item font-medium transition-all text-blue-600 flex items-center gap-3 border border-blue-200 mt-2 bg-blue-50">
-                <i class="fa-solid fa-right-to-bracket w-5"></i> เจ้าหน้าที่เข้าสู่ระบบ
-            </button>
-        </nav>
-        <div class="p-4 border-t text-xs text-gray-400 text-center">
-            v2.0 Powered by Gemini API
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        <!-- Mobile Header -->
-        <header class="md:hidden bg-emerald-600 text-white p-4 flex justify-between items-center shadow-md">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-heart-pulse"></i>
-                <h1 class="font-bold text-sm">รพ.สต.บึงเนียม Smart</h1>
+            <div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#1e40af,#2563eb); display:flex; align-items:center; justify-content:center; color:#c9a84c; font-size:16px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+                <i class="fa-solid fa-hospital"></i>
             </div>
-            <button onclick="toggleMobileMenu()" class="text-xl"><i class="fa-solid fa-bars"></i></button>
-        </header>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full z-30 flex-col">
-            <button onclick="switchTab('form'); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-emerald-700 font-medium"><i class="fa-solid fa-user-plus mr-2"></i> บันทึกข้อมูล</button>
-            <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-gray-700"><i class="fa-solid fa-chart-pie mr-2"></i> Dashboard</button>
-            <button onclick="switchTab('highrisk'); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-red-600 font-medium hidden restricted-feature-mobile"><i class="fa-solid fa-triangle-exclamation mr-2"></i> กลุ่มเสี่ยงสูง สงสัยป่วย</button>
-            <button onclick="switchTab('patients'); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-blue-600 hidden restricted-feature-mobile"><i class="fa-solid fa-users mr-2"></i> รายชื่อผู้ป่วย</button>
-            <button onclick="switchTab('chatbot'); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-purple-600"><i class="fa-solid fa-robot mr-2"></i> ผู้ช่วยสุขภาพอัจฉริยะ AI</button>
-            <button onclick="testLineNotify(); toggleMobileMenu()" class="px-6 py-3 border-b border-gray-100 text-left text-green-600 hidden restricted-feature-mobile"><i class="fa-brands fa-line mr-2"></i> ทดสอบส่ง LINE</button>
-            <button onclick="openLoginModal(); toggleMobileMenu()" id="btn-mobile-login" class="px-6 py-3 border-b border-gray-100 text-left text-blue-600 font-medium bg-blue-50"><i class="fa-solid fa-right-to-bracket mr-2"></i> เจ้าหน้าที่เข้าสู่ระบบ</button>
         </div>
+    </header>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 w-full max-w-7xl mx-auto">
-            
-            <!-- 1. FORM VIEW -->
-            <section id="view-form" class="max-w-3xl mx-auto mt-2 block">
-                <div class="glass-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2 text-emerald-700"><i class="fa-solid fa-notes-medical mr-2"></i>บันทึกข้อมูลคัดกรองสุขภาพ</h2>
-                    
-                    <form id="patient-form" class="space-y-6" onsubmit="submitForm(event)">
-                        <!-- ข้อมูลส่วนตัว -->
-                        <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                            <h3 class="font-bold text-gray-700 border-b pb-2"><i class="fa-solid fa-user text-emerald-600 mr-2"></i>ข้อมูลทั่วไป</h3>
-                            
-                            <!-- กู้คืนช่องกรอกข้อมูลส่วนตัว: CID, วันที่, ชื่อ, เพศ, วันเกิด, อายุ, โรค, ที่อยู่, BMI -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-cid">เลขบัตรประชาชน (CID) *</label><input type="text" id="form-cid" required pattern="\d{13}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-date">วันที่รับบริการ *</label><input type="date" id="form-date" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-name">ชื่อ - นามสกุล *</label><input type="text" id="form-name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-gender">เพศ *</label><select id="form-gender" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option><option value="เพศทางเลือก">เพศทางเลือก</option></select></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-birth">วัน/เดือน/ปีเกิด (พ.ศ.) *</label><input type="text" id="form-birth" required placeholder="วว/ดด/พ.ศ." oninput="formatThaiDate(this); calculateAge()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-age">อายุ (ปี) *</label><input type="number" id="form-age" required readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 outline-none cursor-not-allowed"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-disease">ประวัติครอบครัว *</label><select id="form-disease" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="ไม่มีประวัติ">ไม่มีประวัติ</option><option value="DM">เบาหวาน (DM)</option><option value="HT">ความดันโลหิตสูง (HT)</option><option value="DM+HT">เบาหวาน + ความดัน (DM+HT)</option></select></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-address">บ้านเลขที่</label><input type="text" id="form-address" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-moo">หมู่ที่</label><select id="form-moo" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">หมู่ที่ ${i}</option>`);</script></select></div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-gray-100 pb-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-weight">น้ำหนัก (กก.)</label><input type="number" step="0.1" id="form-weight" oninput="calculateBMI()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-height">ส่วนสูง (ซม.)</label><input type="number" step="0.1" id="form-height" oninput="calculateBMI()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1" for="form-bmi">BMI</label><input type="text" id="form-bmi" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 outline-none cursor-not-allowed"></div>
-                            </div>
+    <div style="flex:1; overflow-y:auto; padding:24px;" id="main-content">
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="form-fbs">น้ำตาลปลายนิ้ว (FBS)</label>
-                                    <input type="number" step="0.1" id="form-fbs" placeholder="mg/dL" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="form-bp-sys">ความดัน (SYS / DIA)</label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="number" id="form-bp-sys" placeholder="ตัวบน" class="w-full border border-gray-300 rounded-lg px-2 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-center">
-                                        <span class="text-gray-500 font-bold">/</span>
-                                        <input type="number" id="form-bp-dia" placeholder="ตัวล่าง" class="w-full border border-gray-300 rounded-lg px-2 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-center">
-                                    </div>
-                                </div>
-                            </div>
+        <!-- ══════ FORM VIEW ══════ -->
+        <section id="view-form" class="view-section" style="max-width:780px; margin:0 auto;">
+            <div class="glass-card" style="padding:28px;">
+                <div style="margin-bottom:24px;">
+                    <div style="font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
+                        <i class="fa-solid fa-notes-medical" style="color:#2563eb; margin-right:8px;"></i>บันทึกข้อมูลคัดกรองสุขภาพ
+                    </div>
+                    <div style="font-size:12px; color:var(--text-secondary);">กรอกข้อมูลให้ครบถ้วน ระบบ AI จะวิเคราะห์ผลทันทีหลังบันทึก</div>
+                </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-blue-200 pt-4">
+                <form id="patient-form" onsubmit="submitForm(event)">
+                    <!-- ข้อมูลทั่วไป -->
+                    <div class="form-section" style="margin-bottom:16px;">
+                        <div class="form-section-title">
+                            <div style="width:28px; height:28px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fa-solid fa-user" style="color:#c9a84c; font-size:12px;"></i>
+                            </div>
+                            ข้อมูลส่วนตัว
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                            <div>
+                                <label class="field-label">เลขบัตรประชาชน (CID) *</label>
+                                <input type="text" id="form-cid" required pattern="\d{13}" class="field-input" placeholder="x-xxxx-xxxxx-xx-x">
+                            </div>
+                            <div>
+                                <label class="field-label">วันที่รับบริการ *</label>
+                                <input type="date" id="form-date" required class="field-input">
+                            </div>
+                            <div>
+                                <label class="field-label">ชื่อ - นามสกุล *</label>
+                                <input type="text" id="form-name" required class="field-input" placeholder="ชื่อ นามสกุล">
+                            </div>
+                            <div>
+                                <label class="field-label">เพศ *</label>
+                                <select id="form-gender" required class="field-input">
+                                    <option value="ชาย">ชาย</option>
+                                    <option value="หญิง">หญิง</option>
+                                    <option value="เพศทางเลือก">เพศทางเลือก</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label">วันเกิด (วว/ดด/พ.ศ.) *</label>
+                                <input type="text" id="form-birth" required placeholder="01/01/2510" class="field-input" oninput="formatThaiDate(this); calculateAge()">
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="form-alcohol">แอลกอฮอล์</label>
-                                    <select id="form-alcohol" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                                        <option value="ไม่ดื่ม">ไม่ดื่ม</option>
-                                        <option value="ดื่มนานๆครั้ง">ดื่มนานๆครั้ง</option>
-                                        <option value="ดื่มเป็นประจำ">ดื่มเป็นประจำ</option>
-                                    </select>
+                                    <label class="field-label">อายุ (ปี)</label>
+                                    <input type="number" id="form-age" readonly class="field-input">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="form-exercise">การออกกำลังกาย</label>
-                                    <select id="form-exercise" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                                        <option value="ไม่ได้ออกกำลังกาย">ไม่ได้ออกกำลังกาย</option>
-                                        <option value="1-2 วัน/สัปดาห์">1-2 วัน/สัปดาห์</option>
-                                        <option value="3 วันขึ้นไป/สัปดาห์">3 วันขึ้นไป/สัปดาห์</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="form-sleep">การนอนหลับ</label>
-                                    <select id="form-sleep" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                                        <option value="น้อยกว่า 6 ชม.">น้อยกว่า 6 ชม.</option>
-                                        <option value="6-8 ชม.">6-8 ชม.</option>
-                                        <option value="มากกว่า 8 ชม.">มากกว่า 8 ชม.</option>
+                                    <label class="field-label">หมู่ที่</label>
+                                    <select id="form-moo" class="field-input">
+                                        <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`);</script>
                                     </select>
                                 </div>
                             </div>
-                            
-                            <div class="pt-2 border-t border-blue-200">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทอาหารที่ทานบ่อย (เลือกได้มากกว่า 1 ข้อ)</label>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="อาหารหวาน" class="rounded text-blue-600 focus:ring-blue-500"><span>🍭 อาหารหวาน</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="อาหารเค็ม" class="rounded text-blue-600 focus:ring-blue-500"><span>🧂 อาหารเค็ม</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="อาหารทอด" class="rounded text-blue-600 focus:ring-blue-500"><span>🍟 อาหารทอด</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="เครื่องดื่มหวาน" class="rounded text-blue-600 focus:ring-blue-500"><span>🥤 เครื่องดื่มหวาน</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="ผักและผลไม้" class="rounded text-blue-600 focus:ring-blue-500"><span>🥦 ผักและผลไม้</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="อาหารไขมันสูง" class="rounded text-blue-600 focus:ring-blue-500"><span>🍖 ไขมันสูง</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="ฟาสต์ฟู้ด" class="rounded text-blue-600 focus:ring-blue-500"><span>🌭 ฟาสต์ฟู้ด</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" name="form-food" value="แป้งจำนวนมาก" class="rounded text-blue-600 focus:ring-blue-500"><span>🍚 แป้งจำนวนมาก</span></label>
+                            <div>
+                                <label class="field-label">บ้านเลขที่</label>
+                                <input type="text" id="form-address" class="field-input" placeholder="xx/x">
+                            </div>
+                            <div>
+                                <label class="field-label">ประวัติครอบครัว</label>
+                                <select id="form-disease" class="field-input">
+                                    <option value="ไม่มีประวัติ">ไม่มีประวัติ</option>
+                                    <option value="DM">เบาหวาน (DM)</option>
+                                    <option value="HT">ความดันโลหิตสูง (HT)</option>
+                                    <option value="DM+HT">DM + HT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลการวัด -->
+                    <div class="form-section" style="margin-bottom:16px;">
+                        <div class="form-section-title">
+                            <div style="width:28px; height:28px; background:linear-gradient(135deg,#059669,#34d399); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fa-solid fa-stethoscope" style="color:#fff; font-size:12px;"></i>
+                            </div>
+                            ผลการตรวจ
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
+                            <div>
+                                <label class="field-label">น้ำหนัก (กก.)</label>
+                                <input type="number" step="0.1" id="form-weight" class="field-input" placeholder="60.0" oninput="calculateBMI()">
+                            </div>
+                            <div>
+                                <label class="field-label">ส่วนสูง (ซม.)</label>
+                                <input type="number" step="0.1" id="form-height" class="field-input" placeholder="165" oninput="calculateBMI()">
+                            </div>
+                            <div>
+                                <label class="field-label">BMI (คำนวณอัตโนมัติ)</label>
+                                <input type="text" id="form-bmi" readonly class="field-input" placeholder="—">
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div>
+                                <label class="field-label">น้ำตาลปลายนิ้ว FBS (mg/dL)</label>
+                                <input type="number" step="0.1" id="form-fbs" class="field-input" placeholder="80 - 200">
+                            </div>
+                            <div>
+                                <label class="field-label">ความดันโลหิต (SYS / DIA)</label>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <input type="number" id="form-bp-sys" class="field-input" placeholder="120" style="text-align:center;">
+                                    <span style="color:var(--text-secondary); font-weight:700;">/</span>
+                                    <input type="number" id="form-bp-dia" class="field-input" placeholder="80" style="text-align:center;">
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-4 rounded-lg shadow-lg transition-transform transform hover:-translate-y-1 flex justify-center items-center gap-2 text-lg">
-                            <i class="fa-solid fa-save"></i> บันทึกข้อมูลและให้ AI วิเคราะห์
+                    <!-- พฤติกรรม -->
+                    <div class="form-section" style="margin-bottom:16px;">
+                        <div class="form-section-title">
+                            <div style="width:28px; height:28px; background:linear-gradient(135deg,#7c3aed,#a78bfa); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fa-solid fa-person-running" style="color:#fff; font-size:12px;"></i>
+                            </div>
+                            พฤติกรรมสุขภาพ
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+                            <div>
+                                <label class="field-label">แอลกอฮอล์</label>
+                                <select id="form-alcohol" class="field-input">
+                                    <option value="ไม่ดื่ม">ไม่ดื่ม</option>
+                                    <option value="ดื่มนานๆครั้ง">ดื่มนานๆครั้ง</option>
+                                    <option value="ดื่มเป็นประจำ">ดื่มเป็นประจำ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label">ออกกำลังกาย</label>
+                                <select id="form-exercise" class="field-input">
+                                    <option value="ไม่ได้ออกกำลังกาย">ไม่ได้ออก</option>
+                                    <option value="1-2 วัน/สัปดาห์">1-2 วัน/สัปดาห์</option>
+                                    <option value="3 วันขึ้นไป/สัปดาห์">3 วัน+/สัปดาห์</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="field-label">การนอนหลับ</label>
+                                <select id="form-sleep" class="field-input">
+                                    <option value="น้อยกว่า 6 ชม.">น้อยกว่า 6 ชม.</option>
+                                    <option value="6-8 ชม." selected>6-8 ชม.</option>
+                                    <option value="มากกว่า 8 ชม.">มากกว่า 8 ชม.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label" style="margin-bottom:10px;">ประเภทอาหารที่ทานบ่อย</label>
+                            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="อาหารหวาน" style="accent-color:#2563eb;"><span>🍭 หวาน</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="อาหารเค็ม" style="accent-color:#2563eb;"><span>🧂 เค็ม</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="อาหารทอด" style="accent-color:#2563eb;"><span>🍟 ทอด</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="เครื่องดื่มหวาน" style="accent-color:#2563eb;"><span>🥤 เครื่องดื่มหวาน</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="ผักและผลไม้" style="accent-color:#2563eb;"><span>🥦 ผัก/ผลไม้</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="อาหารไขมันสูง" style="accent-color:#2563eb;"><span>🍖 ไขมันสูง</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="ฟาสต์ฟู้ด" style="accent-color:#2563eb;"><span>🌭 ฟาสต์ฟู้ด</span></label>
+                                <label class="food-checkbox"><input type="checkbox" name="form-food" value="แป้งจำนวนมาก" style="accent-color:#2563eb;"><span>🍚 แป้งเยอะ</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fa-solid fa-brain"></i>
+                        บันทึกและให้ AI วิเคราะห์ผล
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ══════ DASHBOARD VIEW ══════ -->
+        <section id="view-dashboard" class="view-section" style="display:none;">
+            <!-- Filter Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="font-size:20px; font-weight:700;">ภาพรวมสถานการณ์ NCDs</div>
+                    <div style="font-size:12px; color:var(--text-secondary);">อัปเดตแบบ Real-time จากฐานข้อมูล Google Sheets</div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select id="dash-moo-filter" onchange="renderDashboard()" class="field-input" style="width:auto; padding:8px 14px; font-size:12px;">
+                        <option value="all">ทุกหมู่บ้าน</option>
+                        <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ที่ ${i}</option>`);</script>
+                    </select>
+                    <button onclick="exportDashboardExcel()" style="display:flex; align-items:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(5,150,105,0.3);">
+                        <i class="fa-solid fa-file-excel"></i> ส่งออก Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Grid -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; margin-bottom:20px;">
+                <div class="kpi-card blue">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div class="kpi-icon" style="background:rgba(37,99,235,0.1);">
+                            <i class="fa-solid fa-users" style="color:#2563eb;"></i>
+                        </div>
+                        <span style="font-size:10px; background:rgba(37,99,235,0.1); color:#2563eb; padding:3px 8px; border-radius:20px; font-weight:600;">TOTAL</span>
+                    </div>
+                    <div class="kpi-value" id="kpi-total">—</div>
+                    <div class="kpi-label">ผู้คัดกรองทั้งหมด</div>
+                </div>
+
+                <div class="kpi-card red">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div class="kpi-icon" style="background:rgba(220,38,38,0.1);">
+                            <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;"></i>
+                        </div>
+                        <span style="font-size:10px; background:rgba(220,38,38,0.1); color:#dc2626; padding:3px 8px; border-radius:20px; font-weight:600;">HIGH RISK</span>
+                    </div>
+                    <div class="kpi-value" style="color:#dc2626;" id="kpi-highrisk">—</div>
+                    <div class="kpi-label">กลุ่มสงสัยป่วย</div>
+                </div>
+
+                <div class="kpi-card green">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div class="kpi-icon" style="background:rgba(5,150,105,0.1);">
+                            <i class="fa-solid fa-droplet" style="color:#059669;"></i>
+                        </div>
+                        <span style="font-size:10px; background:rgba(5,150,105,0.1); color:#059669; padding:3px 8px; border-radius:20px; font-weight:600;">DM</span>
+                    </div>
+                    <div class="kpi-value" style="color:#059669;" id="kpi-dm-control">—</div>
+                    <div class="kpi-label">เบาหวาน ปกติ/ทั้งหมด</div>
+                </div>
+
+                <div class="kpi-card gold">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div class="kpi-icon" style="background:rgba(201,168,76,0.1);">
+                            <i class="fa-solid fa-heart-pulse" style="color:#c9a84c;"></i>
+                        </div>
+                        <span style="font-size:10px; background:rgba(201,168,76,0.1); color:#c9a84c; padding:3px 8px; border-radius:20px; font-weight:600;">HT</span>
+                    </div>
+                    <div class="kpi-value" style="color:#c9a84c;" id="kpi-ht-control">—</div>
+                    <div class="kpi-label">ความดัน ปกติ/ทั้งหมด</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                <div class="glass-card" style="padding:22px;">
+                    <div style="font-size:13px; font-weight:700; margin-bottom:4px;">ผลคัดกรองเบาหวาน (FBS)</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px;">ระดับน้ำตาลปลายนิ้ว</div>
+                    <div class="chart-wrap"><canvas id="dmChart"></canvas></div>
+                    <div style="display:flex; justify-content:center; gap:14px; margin-top:12px; font-size:10px; color:var(--text-secondary);">
+                        <span>🟢 ปกติ &lt;100</span>
+                        <span>🟡 เสี่ยง 100-125</span>
+                        <span>🔴 สงสัยป่วย ≥126</span>
+                    </div>
+                </div>
+                <div class="glass-card" style="padding:22px;">
+                    <div style="font-size:13px; font-weight:700; margin-bottom:4px;">ผลคัดกรองความดัน (BP)</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px;">ความดันโลหิต SYS/DIA</div>
+                    <div class="chart-wrap"><canvas id="htChart"></canvas></div>
+                    <div style="display:flex; justify-content:center; gap:14px; margin-top:12px; font-size:10px; color:var(--text-secondary);">
+                        <span>🟢 ปกติ &lt;120/80</span>
+                        <span>🟡 เสี่ยง 120-139</span>
+                        <span>🔴 สงสัยป่วย ≥140</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Moo Chart -->
+            <div class="glass-card" style="padding:22px; margin-bottom:16px;">
+                <div style="font-size:13px; font-weight:700; margin-bottom:4px;"><i class="fa-solid fa-chart-column" style="color:#2563eb; margin-right:6px;"></i>จำนวนผู้คัดกรองรายหมู่บ้าน</div>
+                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px;">เปรียบเทียบความครอบคลุมการคัดกรองแต่ละหมู่</div>
+                <div style="height:180px;"><canvas id="mooChart"></canvas></div>
+            </div>
+
+            <!-- Top Priority Table -->
+            <div class="glass-card" style="padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <div style="font-size:13px; font-weight:700; color:#dc2626;"><i class="fa-solid fa-fire" style="margin-right:6px;"></i>กลุ่มต้องติดตามด่วน</div>
+                        <div style="font-size:11px; color:var(--text-secondary);">ผู้ที่มีค่า FBS ≥ 126 หรือ BP ≥ 140/90</div>
+                    </div>
+                    <button onclick="aiPopulationAnalysis()" style="display:flex; align-items:center; gap:6px; padding:8px 14px; background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(167,139,250,0.1)); color:#7c3aed; border:1px solid rgba(124,58,237,0.2); border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI วิเคราะห์ภาพรวม
+                    </button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ชื่อ-สกุล</th>
+                                <th>ที่อยู่</th>
+                                <th>FBS / BP</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top10-table-body">
+                            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-secondary);">ยังไม่มีข้อมูล</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════ HIGH RISK VIEW ══════ -->
+        <section id="view-highrisk" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="font-size:20px; font-weight:700; color:#dc2626;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>กลุ่มเสี่ยงสูง (High Risk)</div>
+                    <div style="font-size:12px; color:var(--text-secondary);">FBS ≥ 126 mg/dL หรือ BP ≥ 140/90 mmHg</div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <select id="highrisk-moo-filter" onchange="renderHighRiskTable()" class="field-input" style="width:auto; font-size:12px;">
+                        <option value="all">ทุกหมู่บ้าน</option>
+                        <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`);</script>
+                    </select>
+                    <button onclick="exportHighRiskExcel()" style="display:flex; align-items:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
+                        <i class="fa-solid fa-file-excel"></i> ส่งออก
+                    </button>
+                </div>
+            </div>
+            <div class="glass-card" style="overflow:hidden;">
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>CID</th><th>ชื่อ-สกุล</th><th style="text-align:center;">อายุ</th>
+                                <th style="text-align:center;">หมู่</th>
+                                <th style="text-align:center; color:#dc2626;">FBS</th>
+                                <th style="text-align:center; color:#dc2626;">BP</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="highrisk-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════ ALL PATIENTS VIEW ══════ -->
+        <section id="view-patients" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="font-size:20px; font-weight:700;">รายชื่อผู้ป่วยทั้งหมด</div>
+                    <div style="font-size:12px; color:var(--text-secondary);">ข้อมูลผู้เข้ารับการคัดกรองในระบบ</div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="position:relative;">
+                        <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:12px;"></i>
+                        <input type="text" id="search-input" onkeyup="if(event.key==='Enter') filterTable()" placeholder="ค้นหาชื่อ, CID..." class="field-input" style="padding-left:34px; width:200px; font-size:12px;">
+                    </div>
+                    <button onclick="filterTable()" style="padding:8px 16px; background:rgba(37,99,235,0.1); color:#2563eb; border:1px solid rgba(37,99,235,0.2); border-radius:10px; font-size:12px; cursor:pointer;">ค้นหา</button>
+                    <button onclick="exportPatientsExcel()" style="display:flex; align-items:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="glass-card" style="overflow:hidden;">
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>CID</th><th>ชื่อ-สกุล</th><th>โรคประจำตัว</th>
+                                <th style="text-align:center;">FBS</th><th style="text-align:center;">BP</th>
+                                <th style="text-align:center;">ระดับความเสี่ยง</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════ CHATBOT VIEW ══════ -->
+        <section id="view-chatbot" class="view-section" style="display:none; max-width:760px; margin:0 auto; height:calc(100vh - 120px);">
+            <div class="glass-card" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+                <!-- Chat Header -->
+                <div style="padding:20px 24px; background:linear-gradient(135deg,#0a1628 0%,#1e3a5f 100%); display:flex; justify-content:space-between; align-items:center; border-radius:18px 18px 0 0;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:44px; height:44px; background:linear-gradient(135deg,#c9a84c,#f0d080); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(201,168,76,0.4);" class="pulse-glow">
+                            <i class="fa-solid fa-robot" style="color:#0a1628; font-size:18px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:15px; font-weight:700; color:#fff;">AI ผู้ช่วยสุขภาพอัจฉริยะ</div>
+                            <div style="font-size:11px; color:rgba(201,168,76,0.8); display:flex; align-items:center; gap:5px;"><span class="status-dot"></span> Powered by Gemini Pro</div>
+                        </div>
+                    </div>
+                    <button onclick="clearChat()" style="background:rgba(255,255,255,0.1); border:none; color:rgba(255,255,255,0.6); padding:7px 12px; border-radius:8px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                        <i class="fa-solid fa-trash"></i> ล้างแชท
+                    </button>
+                </div>
+                <!-- Chat Messages -->
+                <div id="chat-history" style="flex:1; overflow-y:auto; padding:20px; background:var(--bg-primary); display:flex; flex-direction:column; gap:14px;" class="custom-scroll">
+                    <div style="display:flex; gap:10px;">
+                        <div style="width:32px; height:32px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i class="fa-solid fa-robot" style="color:#c9a84c; font-size:12px;"></i>
+                        </div>
+                        <div class="chat-bubble-ai">
+                            สวัสดีครับ! ผมคือ <strong>AI ผู้ช่วยสุขภาพ</strong> ประจำ รพ.สต.บึงเนียม 🏥<br><br>
+                            มีข้อมูลผู้ป่วยและกลุ่มเสี่ยงอยู่ในระบบแล้ว ถามผมได้เลยครับ เช่น:<br>
+                            • <em>"สรุปสถานการณ์เบาหวานหมู่ 1 ให้หน่อย"</em><br>
+                            • <em>"ผู้ป่วย FBS เกิน 126 ควรปฏิบัติตัวอย่างไร?"</em><br>
+                            • <em>"แนวทางลดความดันโลหิตโดยไม่ใช้ยา"</em>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chat Input -->
+                <div style="padding:16px 20px; border-top:1px solid var(--glass-border); background:var(--glass-bg); border-radius:0 0 18px 18px;">
+                    <form id="chat-form" onsubmit="sendChatMessage(event)" style="display:flex; gap:10px;">
+                        <textarea id="chat-input" placeholder="พิมพ์คำถาม... (Enter ส่ง, Shift+Enter ขึ้นบรรทัด)" required
+                            style="flex:1; padding:12px 16px; border-radius:12px; border:1.5px solid rgba(37,99,235,0.15); background:var(--bg-secondary); color:var(--text-primary); font-family:'Prompt',sans-serif; font-size:13px; resize:none; min-height:44px; max-height:120px; outline:none;"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage(event);}"></textarea>
+                        <button type="submit" style="width:48px; height:48px; background:linear-gradient(135deg,#1e40af,#2563eb); color:#c9a84c; border:none; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(37,99,235,0.3); flex-shrink:0; align-self:flex-end;">
+                            <i class="fa-solid fa-paper-plane" style="font-size:16px;"></i>
                         </button>
                     </form>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 2. DASHBOARD VIEW -->
-            <section id="view-dashboard" class="hidden space-y-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">ภาพรวมสถานการณ์ (Dashboard)</h2>
-                        <p class="text-gray-500">สรุปข้อมูลผู้ป่วยเบาหวานและความดันโลหิตสูง</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="dash-moo-filter" onchange="renderDashboard()" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                            <option value="all">ดูทุกหมู่บ้าน</option>
-                            <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">หมู่ที่ ${i}</option>`);</script>
-                        </select>
-                        <button onclick="exportDashboardExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition" title="ส่งออกข้อมูลหมู่บ้านนี้"><i class="fa-solid fa-file-excel mr-2"></i>ส่งออก Excel</button>
-                    </div>
-                </div>
+    </div><!-- end main-content -->
+</main>
 
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass-card p-6 border-l-4 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">ผู้คัดกรองทั้งหมด</p>
-                                <h3 class="text-3xl font-bold text-gray-800" id="kpi-total">0</h3>
-                            </div>
-                            <div class="bg-blue-100 p-3 rounded-full text-blue-600"><i class="fa-solid fa-users text-xl"></i></div>
-                        </div>
-                    </div>
-                    <div class="glass-card p-6 border-l-4 border-red-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">กลุ่มเสี่ยงสูง (High Risk)</p>
-                                <h3 class="text-3xl font-bold text-red-600" id="kpi-highrisk">0</h3>
-                            </div>
-                            <div class="bg-red-100 p-3 rounded-full text-red-600"><i class="fa-solid fa-siren-on text-xl"></i></div>
-                        </div>
-                    </div>
-                    <div class="glass-card p-6 border-l-4 border-emerald-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">เบาหวาน ปกติ/คุมได้</p>
-                                <h3 class="text-3xl font-bold text-emerald-600" id="kpi-dm-control">0</h3>
-                            </div>
-                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600"><i class="fa-solid fa-cubes-stacked text-xl"></i></div>
-                        </div>
-                    </div>
-                    <div class="glass-card p-6 border-l-4 border-emerald-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">ความดัน ปกติ/คุมได้</p>
-                                <h3 class="text-3xl font-bold text-emerald-600" id="kpi-ht-control">0</h3>
-                            </div>
-                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600"><i class="fa-solid fa-heart-circle-check text-xl"></i></div>
-                        </div>
-                    </div>
-                </div>
+<!-- ═══════════════════════════════════ MODALS ═══════════════════════════════════ -->
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Chart DM -->
-                    <div class="glass-card p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ผลคัดกรองเบาหวาน (FBS)</h3>
-                        <div class="relative h-64"><canvas id="dmChart"></canvas></div>
-                        <div class="mt-4 text-xs text-gray-500 flex justify-center gap-4">
-                            <span><i class="fa-solid fa-circle text-green-500"></i> ปกติ (<100)</span>
-                            <span><i class="fa-solid fa-circle text-yellow-500"></i> เสี่ยง (100-125)</span>
-                            <span><i class="fa-solid fa-circle text-red-500"></i> สงสัยป่วย (≥126)</span>
-                        </div>
-                    </div>
-                    <!-- Chart HT -->
-                    <div class="glass-card p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ผลคัดกรองความดัน (BP)</h3>
-                        <div class="relative h-64"><canvas id="htChart"></canvas></div>
-                        <div class="mt-4 text-xs text-gray-500 flex justify-center gap-4">
-                            <span><i class="fa-solid fa-circle text-green-500"></i> ปกติ (<120/80)</span>
-                            <span><i class="fa-solid fa-circle text-yellow-500"></i> เสี่ยง (120-139/80-89)</span>
-                            <span><i class="fa-solid fa-circle text-red-500"></i> สงสัยป่วย (≥140/90)</span>
-                        </div>
-                    </div>
+<!-- Login Modal -->
+<div class="modal-overlay" id="login-modal" style="display:none;">
+    <div class="modal-box" style="max-width:420px;">
+        <div style="padding:22px 24px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,rgba(30,64,175,0.05),rgba(37,99,235,0.05));">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:36px; height:36px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                    <i class="fa-solid fa-shield-halved" style="color:#c9a84c; font-size:14px;"></i>
                 </div>
-
-                <!-- Moo Chart Comparison -->
-                <div class="glass-card p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-chart-column mr-2 text-blue-500"></i>เปรียบเทียบจำนวนผู้คัดกรองรายหมู่บ้าน</h3>
-                    <div class="relative h-64"><canvas id="mooChart"></canvas></div>
-                </div>
-
-                <div class="glass-card p-6 overflow-hidden flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-red-600"><i class="fa-solid fa-fire mr-2"></i> กลุ่มต้องติดตามด่วน (Top Priority)</h3>
-                        <button onclick="aiPopulationAnalysis()" class="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200 transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI วิเคราะห์ภาพรวมหมู่บ้าน</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3">ลำดับ</th>
-                                    <th class="px-4 py-3">CID/ชื่อ</th>
-                                    <th class="px-4 py-3">ที่อยู่</th>
-                                    <th class="px-4 py-3">ค่าเลือด/BP</th>
-                                    <th class="px-4 py-3 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="top10-table-body" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="text-center py-4 text-gray-400">กดรีเฟรชข้อมูลเพื่อโหลดรายการ</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. HIGH RISK VIEW -->
-            <section id="view-highrisk" class="hidden space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-red-600">กลุ่มเสี่ยงสูง (High Risk) สงสัยป่วย</h2>
-                        <p class="text-gray-500">ผู้ที่มีค่า FBS ≥ 126 หรือ BP ≥ 140/90</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="highrisk-moo-filter" onchange="renderHighRiskTable()" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm">
-                            <option value="all">ดูทุกหมู่บ้าน</option>
-                            <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">หมู่ที่ ${i}</option>`);</script>
-                        </select>
-                        <button onclick="exportHighRiskExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> ส่งออก Excel</button>
-                    </div>
-                </div>
-                <div class="glass-card overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left whitespace-nowrap">
-                            <thead class="text-xs text-gray-600 uppercase bg-red-50">
-                                <tr>
-                                    <th class="px-6 py-4 rounded-tl-lg">CID</th>
-                                    <th class="px-6 py-4">ชื่อ-สกุล</th>
-                                    <th class="px-6 py-4 text-center">อายุ</th>
-                                    <th class="px-6 py-4 text-center">ที่อยู่</th>
-                                    <th class="px-6 py-4 text-center text-red-600">FBS</th>
-                                    <th class="px-6 py-4 text-center text-red-600">BP</th>
-                                    <th class="px-6 py-4 rounded-tr-lg text-center">จัดการข้อมูล</th>
-                                </tr>
-                            </thead>
-                            <tbody id="highrisk-table-body" class="divide-y divide-gray-200"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 4. ALL PATIENTS VIEW -->
-            <section id="view-patients" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">รายชื่อผู้ป่วยทั้งหมด</h2>
-                        <p class="text-gray-500">ข้อมูลอัปเดตล่าสุดจากฐานข้อมูล</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="search-input" onkeyup="if(event.key === 'Enter') filterTable()" placeholder="ค้นหา ชื่อ, CID..." class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <button onclick="filterTable()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-lg transition"><i class="fa-solid fa-search"></i></button>
-                        <button onclick="exportPatientsExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition" title="ส่งออกข้อมูลทั้งหมด"><i class="fa-solid fa-file-excel"></i></button>
-                    </div>
-                </div>
-                <div class="glass-card overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left whitespace-nowrap">
-                            <thead class="text-xs text-gray-600 uppercase bg-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 rounded-tl-lg">CID</th>
-                                    <th class="px-6 py-4">ชื่อ-สกุล</th>
-                                    <th class="px-6 py-4">โรค</th>
-                                    <th class="px-6 py-4 text-center">FBS</th>
-                                    <th class="px-6 py-4 text-center">BP</th>
-                                    <th class="px-6 py-4 text-center">ระดับความเสี่ยง</th>
-                                    <th class="px-6 py-4 rounded-tr-lg text-center">จัดการ (Actions)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="patients-table-body" class="divide-y divide-gray-200"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. CHATBOT VIEW -->
-            <section id="view-chatbot" class="hidden max-w-4xl mx-auto h-full flex flex-col" style="height: calc(100vh - 8.5rem); min-height: 35rem;">
-                <div class="glass-card flex-1 flex flex-col overflow-hidden border border-purple-100 shadow-xl">
-                    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-white p-2 rounded-full text-purple-600"><i class="fa-solid fa-robot text-xl"></i></div>
-                            <div>
-                                <h2 class="font-bold text-lg">ผู้ช่วยสุขภาพอัจฉริยะ AI</h2>
-                                <p class="text-xs text-purple-100">พร้อมให้บริการ · Powered by Gemini</p>
-                            </div>
-                        </div>
-                        <button onclick="document.getElementById('chat-history').innerHTML='<div class=\'text-center text-gray-400 text-sm my-4\'>สวัสดีครับ! ล้างประวัติแชทแล้ว พร้อมรับคำถามใหม่ครับ 🏥</div>'; chatContextHistory=[];" class="text-purple-200 hover:text-white text-sm"><i class="fa-solid fa-trash mr-1"></i> ล้างแชท</button>
-                    </div>
-                    
-                    <div id="chat-history" class="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 bg-gray-50 custom-scrollbar">
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div>
-                            <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[85%] leading-relaxed">
-                                สวัสดีครับ! ผมคือ <b>ผู้ช่วยสุขภาพอัจฉริยะ AI</b> ประจำ รพ.สต. บึงเนียม<br><br>ผมมีข้อมูลภาพรวมคนไข้และกลุ่มเสี่ยงทั้งหมดอยู่ในระบบแล้ว คุณสามารถสอบถามผมได้เลยครับ เช่น:<br>• <i>"ช่วยสรุปสถานการณ์โรคเบาหวานของหมู่ 1 ให้ฟังหน่อย"</i><br>• <i>"ผู้ป่วยที่มี FBS เกิน 126 ควรแนะนำการปฏิบัติตัวอย่างไร?"</i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-white border-t border-gray-200">
-                        <form id="chat-form" class="flex gap-2" onsubmit="sendChatMessage(event)">
-                            <textarea id="chat-input" placeholder="พิมพ์คำถามที่นี่... (รองรับการขึ้นบรรทัดใหม่ด้วย Shift+Enter)" required class="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition text-sm resize-y custom-scrollbar" style="min-height: 50px; max-height: 240px;" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendChatMessage(event);}"></textarea>
-                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white rounded-xl w-14 flex items-center justify-center transition shadow-md flex-shrink-0">
-                                <i class="fa-solid fa-paper-plane text-xl"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </section>
-
+                <div style="font-size:15px; font-weight:700;">เข้าสู่ระบบเจ้าหน้าที่</div>
+            </div>
+            <button onclick="closeModal('login-modal')" style="background:none; border:none; color:var(--text-secondary); font-size:18px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <!-- MODALS -->
-        
-        <!-- Login Modal -->
-        <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
-                    <h3 class="font-bold text-lg text-blue-800"><i class="fa-solid fa-lock mr-2"></i> เข้าสู่ระบบเจ้าหน้าที่</h3>
-                    <button onclick="closeLoginModal()" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input type="text" id="login-user" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" id="login-pass" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" onkeyup="if(event.key === 'Enter') checkLogin()">
-                    </div>
-                    <p id="login-error" class="text-red-500 text-sm hidden"><i class="fa-solid fa-circle-exclamation"></i> Username หรือ Password ไม่ถูกต้อง</p>
-                </div>
-                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
-                    <button onclick="closeLoginModal()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100">ยกเลิก</button>
-                    <button onclick="checkLogin()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">เข้าสู่ระบบ</button>
-                </div>
+        <div style="padding:24px;">
+            <div style="margin-bottom:14px;">
+                <label class="field-label">Username</label>
+                <input type="text" id="login-user" class="field-input" placeholder="กรอก Username">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label class="field-label">Password</label>
+                <input type="password" id="login-pass" class="field-input" placeholder="กรอก Password" onkeyup="if(event.key==='Enter') checkLogin()">
+            </div>
+            <p id="login-error" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px;"><i class="fa-solid fa-circle-exclamation" style="margin-right:4px;"></i>Username หรือ Password ไม่ถูกต้อง</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeModal('login-modal')" style="flex:1; padding:11px; border:1.5px solid var(--glass-border); background:none; color:var(--text-primary); border-radius:10px; font-family:'Prompt',sans-serif; cursor:pointer; font-size:13px;">ยกเลิก</button>
+                <button onclick="checkLogin()" style="flex:2; padding:11px; background:linear-gradient(135deg,#1e40af,#2563eb); color:#fff; border:none; border-radius:10px; font-family:'Prompt',sans-serif; font-weight:700; cursor:pointer; font-size:13px;">เข้าสู่ระบบ</button>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Custom Alert Modal -->
-        <div id="alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center transform transition-all">
-                <div id="alert-header" class="p-6 pb-2">
-                    <div id="alert-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i id="alert-icon" class="fa-solid fa-circle-info text-3xl"></i>
+<!-- Alert Modal -->
+<div class="modal-overlay" id="alert-modal" style="display:none;">
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+        <div style="padding:30px 24px 16px;">
+            <div id="alert-icon-wrap" style="width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:24px;"></div>
+            <div id="alert-title" style="font-size:17px; font-weight:700; margin-bottom:8px;"></div>
+            <div id="alert-message" style="font-size:13px; color:var(--text-secondary); white-space:pre-wrap; line-height:1.6;"></div>
+        </div>
+        <div style="padding:16px 24px 24px;">
+            <button onclick="closeAlert()" id="alert-btn" style="width:100%; padding:12px; border:none; border-radius:10px; font-family:'Prompt',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">ตกลง</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Advice Modal (after form submit) -->
+<div class="modal-overlay" id="ai-advice-modal" style="display:none;">
+    <div class="modal-box" style="max-width:640px; max-height:90vh; display:flex; flex-direction:column;">
+        <div style="padding:20px 24px; border-bottom:1px solid var(--glass-border); background:linear-gradient(135deg,rgba(30,64,175,0.05),rgba(201,168,76,0.05)); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:15px; font-weight:700;"><i class="fa-solid fa-user-doctor" style="color:#2563eb; margin-right:8px;"></i>สรุปผลการตรวจ — <span id="advice-name"></span></div>
+                <div style="font-size:11px; color:var(--text-secondary);">วิเคราะห์โดย AI อิงมาตรฐานสาธารณสุข</div>
+            </div>
+            <button onclick="closeModal('ai-advice-modal')" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="ai-advice-content" style="padding:24px; overflow-y:auto; flex:1; font-size:14px; line-height:1.8;" class="custom-scroll"></div>
+        <div style="padding:16px 24px; border-top:1px solid var(--glass-border);">
+            <button onclick="closeModal('ai-advice-modal')" class="submit-btn" style="max-width:300px; margin:0 auto; padding:12px;">ตกลง รับทราบ</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Analysis Modal (patient / population) -->
+<div class="modal-overlay" id="ai-modal" style="display:none;">
+    <div class="modal-box" style="max-width:640px; max-height:90vh; display:flex; flex-direction:column;">
+        <div style="padding:20px 24px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:15px; font-weight:700;"><i class="fa-solid fa-wand-magic-sparkles" style="color:#c9a84c; margin-right:8px;"></i>AI ประมวลผลและวิเคราะห์</div>
+            <button onclick="closeModal('ai-modal')" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="ai-modal-content" style="padding:24px; overflow-y:auto; flex:1; font-size:14px; line-height:1.8;" class="custom-scroll"></div>
+        <div style="padding:16px 24px; border-top:1px solid var(--glass-border); display:flex; justify-content:flex-end;">
+            <button onclick="closeModal('ai-modal')" style="padding:10px 24px; border:1.5px solid var(--glass-border); background:none; color:var(--text-primary); border-radius:10px; font-family:'Prompt',sans-serif; cursor:pointer;">ปิด</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal" style="display:none;">
+    <div class="modal-box" style="max-width:680px; max-height:90vh; display:flex; flex-direction:column;">
+        <div style="padding:20px 24px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:15px; font-weight:700;"><i class="fa-solid fa-pen-to-square" style="color:#2563eb; margin-right:8px;"></i>แก้ไขข้อมูลผู้ป่วย</div>
+            <button onclick="closeModal('edit-modal')" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="padding:24px; overflow-y:auto; flex:1;" class="custom-scroll">
+            <form id="edit-patient-form" onsubmit="submitEditForm(event)">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label class="field-label">CID (ไม่สามารถแก้ไข)</label><input type="text" id="edit-cid" readonly class="field-input"></div>
+                    <div><label class="field-label">วันที่รับบริการ</label><input type="date" id="edit-date" class="field-input"></div>
+                    <div><label class="field-label">ชื่อ-นามสกุล</label><input type="text" id="edit-name" class="field-input"></div>
+                    <div><label class="field-label">เพศ</label><select id="edit-gender" class="field-input"><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option><option value="เพศทางเลือก">เพศทางเลือก</option></select></div>
+                    <div><label class="field-label">วันเกิด (พ.ศ.)</label><input type="text" id="edit-birth" class="field-input" oninput="formatThaiDate(this); calculateEditAge()"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div><label class="field-label">อายุ</label><input type="number" id="edit-age" readonly class="field-input"></div>
+                        <div><label class="field-label">หมู่ที่</label><select id="edit-moo" class="field-input"><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`);</script></select></div>
                     </div>
-                    <h3 id="alert-title" class="font-bold text-xl text-gray-800 mb-2">แจ้งเตือน</h3>
+                    <div><label class="field-label">บ้านเลขที่</label><input type="text" id="edit-address" class="field-input"></div>
+                    <div><label class="field-label">ประวัติครอบครัว</label><select id="edit-disease" class="field-input"><option value="ไม่มีประวัติ">ไม่มีประวัติ</option><option value="DM">DM</option><option value="HT">HT</option><option value="DM+HT">DM+HT</option></select></div>
                 </div>
-                <div class="px-6 pb-6 text-sm text-gray-600 whitespace-pre-wrap" id="alert-message"></div>
-                <div class="p-4 bg-gray-50 border-t border-gray-100">
-                    <button onclick="closeAlert()" id="alert-btn" class="w-full font-bold py-3 px-4 rounded-xl shadow-sm transition">ตกลง</button>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label class="field-label">น้ำหนัก (กก.)</label><input type="number" step="0.1" id="edit-weight" class="field-input" oninput="calculateEditBMI()"></div>
+                    <div><label class="field-label">ส่วนสูง (ซม.)</label><input type="number" step="0.1" id="edit-height" class="field-input" oninput="calculateEditBMI()"></div>
+                    <div><label class="field-label">BMI</label><input type="text" id="edit-bmi" readonly class="field-input"></div>
                 </div>
-            </div>
-        </div>
-
-        <!-- AI Patient Analysis Modal -->
-        <div id="ai-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-emerald-50 to-teal-50">
-                    <h3 class="font-bold text-lg text-emerald-800"><i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-2"></i> AI ประมวลผล</h3>
-                    <button onclick="closeModal('ai-modal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label class="field-label">FBS</label><input type="number" step="0.1" id="edit-fbs" class="field-input"></div>
+                    <div><label class="field-label">BP (SYS/DIA)</label><div style="display:flex; gap:6px; align-items:center;"><input type="number" id="edit-bp-sys" class="field-input" style="text-align:center;"><span style="color:var(--text-secondary);">/</span><input type="number" id="edit-bp-dia" class="field-input" style="text-align:center;"></div></div>
                 </div>
-                <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                    <div id="ai-modal-content" class="prose prose-sm max-w-none text-gray-700"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label class="field-label">แอลกอฮอล์</label><select id="edit-alcohol" class="field-input"><option>ไม่ดื่ม</option><option>ดื่มนานๆครั้ง</option><option>ดื่มเป็นประจำ</option></select></div>
+                    <div><label class="field-label">ออกกำลังกาย</label><select id="edit-exercise" class="field-input"><option>ไม่ได้ออกกำลังกาย</option><option>1-2 วัน/สัปดาห์</option><option>3 วันขึ้นไป/สัปดาห์</option></select></div>
+                    <div><label class="field-label">การนอน</label><select id="edit-sleep" class="field-input"><option>น้อยกว่า 6 ชม.</option><option>6-8 ชม.</option><option>มากกว่า 8 ชม.</option></select></div>
                 </div>
-                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-                    <button onclick="closeModal('ai-modal')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">ปิดหน้าต่าง</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- AI Immediate Advice Modal -->
-        <div id="ai-advice-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-                <div class="p-5 border-b border-blue-100 flex justify-between items-center bg-blue-50">
-                    <div>
-                        <h3 class="font-bold text-xl text-blue-800"><i class="fa-solid fa-user-doctor text-blue-600 mr-2"></i>สรุปผลการตรวจ - <span id="advice-name"></span></h3>
-                        <p class="text-xs text-blue-600 mt-1">วิเคราะห์โดยอิงจากมาตรฐานสาธารณสุข และ AI</p>
+                <div>
+                    <label class="field-label" style="margin-bottom:10px;">อาหารที่ทานบ่อย</label>
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="อาหารหวาน" style="accent-color:#2563eb;"><span>🍭 หวาน</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="อาหารเค็ม" style="accent-color:#2563eb;"><span>🧂 เค็ม</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="อาหารทอด" style="accent-color:#2563eb;"><span>🍟 ทอด</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="เครื่องดื่มหวาน" style="accent-color:#2563eb;"><span>🥤 หวาน</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="ผักและผลไม้" style="accent-color:#2563eb;"><span>🥦 ผัก</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="อาหารไขมันสูง" style="accent-color:#2563eb;"><span>🍖 ไขมัน</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="ฟาสต์ฟู้ด" style="accent-color:#2563eb;"><span>🌭 ฟาสต์ฟู้ด</span></label>
+                        <label class="food-checkbox"><input type="checkbox" name="edit-food" value="แป้งจำนวนมาก" style="accent-color:#2563eb;"><span>🍚 แป้ง</span></label>
                     </div>
-                    <button onclick="closeModal('ai-advice-modal')" class="text-gray-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="p-6 overflow-y-auto flex-1 custom-scrollbar" id="ai-advice-content" style="font-size: 15px; line-height: 1.7;"></div>
-                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
-                    <button onclick="closeModal('ai-advice-modal')" class="bg-blue-600 text-white font-bold px-10 py-3 rounded-xl hover:bg-blue-700 transition w-full md:w-auto text-lg shadow-md">ตกลง (ทำงานต่อ)</button>
-                </div>
-            </div>
+                <button type="submit" id="btn-submit-edit" style="display:none;"></button>
+            </form>
         </div>
-
-        <!-- Edit Patient Modal -->
-        <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
-                    <h3 class="font-bold text-lg text-blue-800"><i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูลผู้ป่วย</h3>
-                    <button onclick="closeModal('edit-modal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                    <form id="edit-patient-form" class="space-y-4" onsubmit="submitEditForm(event)">
-                        <!-- Mirror of form fields for editing -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-cid">เลขบัตรประชาชน (CID) *</label><input type="text" id="edit-cid" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 outline-none cursor-not-allowed"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-date">วันที่รับบริการ *</label><input type="date" id="edit-date" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-name">ชื่อ - นามสกุล *</label><input type="text" id="edit-name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-gender">เพศ *</label><select id="edit-gender" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option><option value="เพศทางเลือก">เพศทางเลือก</option></select></div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-birth">วัน/เดือน/ปีเกิด (พ.ศ.) *</label><input type="text" id="edit-birth" required placeholder="วว/ดด/พ.ศ." oninput="formatThaiDate(this); calculateEditAge()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-age">อายุ (ปี) *</label><input type="number" id="edit-age" required readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 outline-none cursor-not-allowed"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-disease">ประวัติครอบครัว *</label><select id="edit-disease" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"><option value="ไม่มีประวัติ">ไม่มีประวัติ</option><option value="DM">เบาหวาน (DM)</option><option value="HT">ความดันโลหิตสูง (HT)</option><option value="DM+HT">เบาหวาน + ความดัน (DM+HT)</option></select></div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-address">บ้านเลขที่</label><input type="text" id="edit-address" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-moo">หมู่ที่</label><select id="edit-moo" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"><script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">หมู่ที่ ${i}</option>`);</script></select></div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-gray-200 pb-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-weight">น้ำหนัก (กก.)</label><input type="number" step="0.1" id="edit-weight" oninput="calculateEditBMI()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-height">ส่วนสูง (ซม.)</label><input type="number" step="0.1" id="edit-height" oninput="calculateEditBMI()" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-bmi">BMI</label><input type="text" id="edit-bmi" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 outline-none cursor-not-allowed"></div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-fbs">FBS</label><input type="number" step="0.1" id="edit-fbs" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-bp-sys">BP (SYS/DIA)</label>
-                                <div class="flex items-center gap-1">
-                                    <input type="number" id="edit-bp-sys" class="w-full border border-gray-300 rounded-lg px-2 py-2 focus:ring-2 focus:ring-blue-500 text-center"><span class="font-bold text-gray-400">/</span><input type="number" id="edit-bp-dia" class="w-full border border-gray-300 rounded-lg px-2 py-2 focus:ring-2 focus:ring-blue-500 text-center">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-200 pt-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-alcohol">แอลกอฮอล์</label><select id="edit-alcohol" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"><option value="ไม่ดื่ม">ไม่ดื่ม</option><option value="ดื่มนานๆครั้ง">ดื่มนานๆครั้ง</option><option value="ดื่มเป็นประจำ">ดื่มเป็นประจำ</option></select></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-exercise">ออกกำลังกาย</label><select id="edit-exercise" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"><option value="ไม่ได้ออกกำลังกาย">ไม่ได้ออก</option><option value="1-2 วัน/สัปดาห์">1-2 วัน/สัปดาห์</option><option value="3 วันขึ้นไป/สัปดาห์">3 วันขึ้นไป</option></select></div>
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1" for="edit-sleep">การนอนหลับ</label><select id="edit-sleep" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"><option value="น้อยกว่า 6 ชม.">น้อยกว่า 6 ชม.</option><option value="6-8 ชม.">6-8 ชม.</option><option value="มากกว่า 8 ชม.">มากกว่า 8 ชม.</option></select></div>
-                        </div>
-                        <div class="pt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทอาหารที่ทานบ่อย</label>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="อาหารหวาน" class="rounded text-blue-600"><span>อาหารหวาน</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="อาหารเค็ม" class="rounded text-blue-600"><span>อาหารเค็ม</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="อาหารทอด" class="rounded text-blue-600"><span>อาหารทอด</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="เครื่องดื่มหวาน" class="rounded text-blue-600"><span>เครื่องดื่มหวาน</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="ผักและผลไม้" class="rounded text-blue-600"><span>ผักและผลไม้</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="อาหารไขมันสูง" class="rounded text-blue-600"><span>ไขมันสูง</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="ฟาสต์ฟู้ด" class="rounded text-blue-600"><span>ฟาสต์ฟู้ด</span></label>
-                                <label class="flex items-center space-x-2"><input type="checkbox" name="edit-food" value="แป้งจำนวนมาก" class="rounded text-blue-600"><span>แป้งเยอะ</span></label>
-                            </div>
-                        </div>
-                        <button type="submit" id="btn-submit-edit" class="hidden"></button>
-                    </form>
-                </div>
-                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
-                    <button onclick="closeModal('edit-modal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-100 transition">ยกเลิก</button>
-                    <button onclick="document.getElementById('btn-submit-edit').click()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i class="fa-solid fa-save mr-2"></i>บันทึกการแก้ไข</button>
-                </div>
-            </div>
+        <div style="padding:16px 24px; border-top:1px solid var(--glass-border); display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="closeModal('edit-modal')" style="padding:10px 20px; border:1.5px solid var(--glass-border); background:none; color:var(--text-primary); border-radius:10px; font-family:'Prompt',sans-serif; cursor:pointer; font-size:13px;">ยกเลิก</button>
+            <button onclick="document.getElementById('btn-submit-edit').click()" style="padding:10px 24px; background:linear-gradient(135deg,#1e40af,#2563eb); color:#fff; border:none; border-radius:10px; font-family:'Prompt',sans-serif; font-weight:700; cursor:pointer; font-size:13px;"><i class="fa-solid fa-save" style="margin-right:6px;"></i>บันทึกการแก้ไข</button>
         </div>
+    </div>
+</div>
 
-        <!-- Delete Confirm Modal -->
-        <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden text-center">
-                <div class="p-6">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-triangle-exclamation text-3xl text-red-600"></i>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 mb-2">ยืนยันการลบข้อมูล?</h3>
-                    <p class="text-gray-500 text-sm">คุณต้องการลบข้อมูลของ <br><strong id="delete-patient-name" class="text-gray-800 text-base"></strong><br> ออกจากระบบอย่างถาวรใช่หรือไม่?</p>
-                </div>
-                <div class="p-4 bg-gray-50 flex justify-center gap-3">
-                    <button onclick="closeModal('delete-modal')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-100 transition font-bold">ยกเลิก</button>
-                    <button onclick="executeDelete()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition font-bold">ยืนยันลบ</button>
-                </div>
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+        <div style="padding:30px 24px 16px;">
+            <div style="width:60px; height:60px; background:rgba(220,38,38,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                <i class="fa-solid fa-trash" style="color:#dc2626; font-size:22px;"></i>
             </div>
+            <div style="font-size:17px; font-weight:700; margin-bottom:8px;">ยืนยันการลบข้อมูล?</div>
+            <div style="font-size:13px; color:var(--text-secondary);">คุณต้องการลบข้อมูลของ<br><strong id="delete-patient-name" style="color:var(--text-primary); font-size:15px;"></strong><br>ออกจากระบบอย่างถาวร?</div>
         </div>
+        <div style="padding:16px 24px 24px; display:flex; gap:10px;">
+            <button onclick="closeModal('delete-modal')" style="flex:1; padding:11px; border:1.5px solid var(--glass-border); background:none; color:var(--text-primary); border-radius:10px; font-family:'Prompt',sans-serif; cursor:pointer;">ยกเลิก</button>
+            <button onclick="executeDelete()" style="flex:1; padding:11px; background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff; border:none; border-radius:10px; font-family:'Prompt',sans-serif; font-weight:700; cursor:pointer;">ยืนยันลบ</button>
+        </div>
+    </div>
+</div>
 
-    </main>
 
-    <!-- CORE LOGIC SCRIPT -->
-    <script>
-        // ==========================================
-        // 1. CONFIGURATION
-        // ==========================================
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTsOoF-K0_xDJVphEl96dbdy3fJNJsKuE7-jKx9zzPRcBzjRdnjy12RQGCKQafhsTo/exec";
-        
-        // Global State
-        let allPatients = [];
-        let dmChartInstance = null;
-        let htChartInstance = null;
-        let mooChartInstance = null;
-        let isConfigured = GAS_WEB_APP_URL !== "YOUR_WEB_APP_URL_HERE";
-        let isLoggedIn = false;
-        let currentDeleteCid = "";
-        let chatContextHistory = [];
+<!-- ═══════════════════════════════════════ SCRIPTS ═══════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyTsOoF-K0_xDJVphEl96dbdy3fJNJsKuE7-jKx9zzPRcBzjRdnjy12RQGCKQafhsTo/exec";
+let allPatients = [];
+let dmChartInst = null, htChartInst = null, mooChartInst = null;
+let isLoggedIn = false;
+let currentDeleteCid = "";
+let chatContextHistory = [];
+let currentDashboardStats = {};
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (document.getElementById('form-date')) {
-                document.getElementById('form-date').valueAsDate = new Date();
-            }
-            if(isConfigured) {
-                // ดึงข้อมูลทั้งหมดจาก GS ทันทีที่เปิดเว็บเพื่อให้มีข้อมูลพร้อมแสดงเสมอ
-                fetch(GAS_WEB_APP_URL + "?action=getPatients")
-                .then(res => res.json())
-                .then(data => { 
-                    if(data.status === 'success') { 
-                        allPatients = data.data || []; 
-                        window.currentDashboardStats = { total: allPatients.length, highRisk: allPatients.filter(p => p.risk_level === 'HIGH').length };
-                    } 
-                })
-                .catch(e => console.log(e));
-            }
-        });
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('form-date').valueAsDate = new Date();
+    // Mobile hamburger
+    if (window.innerWidth <= 768) {
+        document.getElementById('hamburger').style.display = 'flex';
+    }
+    // Auto theme detect
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme','dark');
+    }
+    // Preload patients
+    fetch(GAS_WEB_APP_URL + "?action=getPatients")
+        .then(r => r.json())
+        .then(d => { if(d.status==='success') { allPatients = d.data||[]; currentDashboardStats = { total: allPatients.length, highRisk: allPatients.filter(p=>p.risk_level==='HIGH').length }; } })
+        .catch(()=>{});
+});
 
-        // ==========================================
-        // 2. UI HELPERS & NAVIGATION
-        // ==========================================
-        function showAlert(message, type = 'info', title = 'แจ้งเตือน') {
-            document.getElementById('alert-message').innerText = message;
-            document.getElementById('alert-title').innerText = title;
-            const icon = document.getElementById('alert-icon');
-            const iconContainer = document.getElementById('alert-icon-container');
-            const btn = document.getElementById('alert-btn');
-            
-            icon.className = 'text-3xl ';
-            if(type === 'success') {
-                icon.className += 'fa-solid fa-check text-green-600';
-                iconContainer.className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-100';
-                btn.className = 'w-full font-bold py-3 px-4 rounded-xl shadow-sm transition bg-green-600 text-white hover:bg-green-700';
-            } else if(type === 'error') {
-                icon.className += 'fa-solid fa-xmark text-red-600';
-                iconContainer.className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100';
-                btn.className = 'w-full font-bold py-3 px-4 rounded-xl shadow-sm transition bg-red-600 text-white hover:bg-red-700';
-            } else if(type === 'warning') {
-                icon.className += 'fa-solid fa-triangle-exclamation text-amber-600';
-                iconContainer.className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100';
-                btn.className = 'w-full font-bold py-3 px-4 rounded-xl shadow-sm transition bg-amber-500 text-white hover:bg-amber-600';
-            } else {
-                icon.className += 'fa-solid fa-circle-info text-blue-600';
-                iconContainer.className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-blue-100';
-                btn.className = 'w-full font-bold py-3 px-4 rounded-xl shadow-sm transition bg-blue-600 text-white hover:bg-blue-700';
-            }
-            document.getElementById('alert-modal').classList.remove('hidden');
+// ════════════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════════════
+function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+}
+
+// ════════════════════════════════════════════════
+// MOBILE MENU
+// ════════════════════════════════════════════════
+function openMobileMenu() { document.getElementById('sidebar').classList.add('mobile-open'); document.getElementById('mobileOverlay').classList.add('active'); }
+function closeMobileMenu() { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('mobileOverlay').classList.remove('active'); }
+
+// ════════════════════════════════════════════════
+// LOADING
+// ════════════════════════════════════════════════
+function showLoading(t) { document.getElementById('loading-text').innerText = t||'กำลังประมวลผล...'; document.getElementById('loading-overlay').style.display='flex'; }
+function hideLoading() { document.getElementById('loading-overlay').style.display='none'; }
+
+// ════════════════════════════════════════════════
+// ALERT
+// ════════════════════════════════════════════════
+function showAlert(msg, type='info', title='แจ้งเตือน') {
+    const configs = {
+        success: { icon:'fa-check', bg:'rgba(5,150,105,0.1)', color:'#059669', btn:'#059669' },
+        error: { icon:'fa-xmark', bg:'rgba(220,38,38,0.1)', color:'#dc2626', btn:'#dc2626' },
+        warning: { icon:'fa-triangle-exclamation', bg:'rgba(245,158,11,0.1)', color:'#d97706', btn:'#d97706' },
+        info: { icon:'fa-circle-info', bg:'rgba(37,99,235,0.1)', color:'#2563eb', btn:'#2563eb' }
+    };
+    const c = configs[type] || configs.info;
+    const w = document.getElementById('alert-icon-wrap');
+    w.style.background = c.bg;
+    w.innerHTML = `<i class="fa-solid ${c.icon}" style="color:${c.color}; font-size:24px;"></i>`;
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-message').innerText = msg;
+    const btn = document.getElementById('alert-btn');
+    btn.style.cssText = `width:100%; padding:12px; border:none; border-radius:10px; font-family:'Prompt',sans-serif; font-size:14px; font-weight:700; cursor:pointer; background:${c.btn}; color:#fff;`;
+    document.getElementById('alert-modal').style.display = 'flex';
+}
+function closeAlert() { document.getElementById('alert-modal').style.display='none'; }
+function closeModal(id) { document.getElementById(id).style.display='none'; }
+
+// ════════════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════════════
+function openLoginModal() { document.getElementById('login-modal').style.display='flex'; document.getElementById('login-error').style.display='none'; document.getElementById('login-user').value=''; document.getElementById('login-pass').value=''; }
+function checkLogin() {
+    if(document.getElementById('login-user').value==='admin' && document.getElementById('login-pass').value==='1234') {
+        isLoggedIn=true; closeModal('login-modal');
+        document.querySelectorAll('.restricted-feature').forEach(el=>el.classList.remove('hidden'));
+        document.getElementById('btn-login').style.display='none';
+        document.getElementById('user-badge').style.display='block';
+        showAlert('เข้าสู่ระบบสำเร็จ ยินดีต้อนรับครับ','success','ยินดีต้อนรับ');
+    } else { document.getElementById('login-error').style.display='block'; }
+}
+
+// ════════════════════════════════════════════════
+// TAB NAVIGATION
+// ════════════════════════════════════════════════
+const tabMeta = {
+    form: { title:'บันทึกคัดกรองสุขภาพ', sub:'กรอกข้อมูลเพื่อให้ AI วิเคราะห์ผลทันที' },
+    dashboard: { title:'Dashboard ภาพรวม NCDs', sub:'สถิติและกราฟแบบ Real-time' },
+    highrisk: { title:'กลุ่มเสี่ยงสูง / สงสัยป่วย', sub:'FBS ≥ 126 หรือ BP ≥ 140/90' },
+    patients: { title:'รายชื่อผู้ป่วยทั้งหมด', sub:'ค้นหาและจัดการข้อมูล' },
+    chatbot: { title:'AI ผู้ช่วยสุขภาพอัจฉริยะ', sub:'Powered by Gemini Pro' }
+};
+
+function switchTab(tab) {
+    if(!isLoggedIn && ['highrisk','patients'].includes(tab)) { openLoginModal(); return; }
+    Object.keys(tabMeta).forEach(id => {
+        const view = document.getElementById(`view-${id}`);
+        const btn = document.getElementById(`btn-${id}`);
+        if(view) view.style.display='none';
+        if(btn) { btn.classList.remove('active'); }
+    });
+    const targetView = document.getElementById(`view-${tab}`);
+    const targetBtn = document.getElementById(`btn-${tab}`);
+    if(targetView) { targetView.style.display='block'; targetView.classList.add('view-section'); }
+    if(targetBtn) targetBtn.classList.add('active');
+    const meta = tabMeta[tab];
+    if(meta) { document.getElementById('page-title').innerText=meta.title; document.getElementById('page-sub').innerText=meta.sub; }
+    if(tab==='dashboard') loadDashboardData();
+    if(tab==='patients') loadPatientsData('all');
+    if(tab==='highrisk') loadPatientsData('high');
+    closeMobileMenu();
+}
+
+// ════════════════════════════════════════════════
+// FORM HELPERS
+// ════════════════════════════════════════════════
+function formatThaiDate(input) {
+    let val=input.value.replace(/\D/g,'');
+    if(val.length>8) val=val.substring(0,8);
+    if(val.length>=5) input.value=val.substring(0,2)+'/'+val.substring(2,4)+'/'+val.substring(4,8);
+    else if(val.length>=3) input.value=val.substring(0,2)+'/'+val.substring(2,4);
+    else input.value=val;
+}
+function getBirthDate(str) {
+    if(!str) return null;
+    if(str.includes('/')) { const p=str.split('/'); if(p.length===3&&p[2].length===4) return new Date(parseInt(p[2])-543, parseInt(p[1])-1, parseInt(p[0])); }
+    if(str.includes('-')) return new Date(str);
+    return null;
+}
+function calcAge(d, tId) {
+    if(!d||isNaN(d)) { document.getElementById(tId).value=''; return; }
+    const today=new Date(); let age=today.getFullYear()-d.getFullYear();
+    const m=today.getMonth()-d.getMonth(); if(m<0||(m===0&&today.getDate()<d.getDate())) age--;
+    document.getElementById(tId).value = age>=0?age:0;
+}
+function calculateAge() { calcAge(getBirthDate(document.getElementById('form-birth').value),'form-age'); }
+function calculateEditAge() { calcAge(getBirthDate(document.getElementById('edit-birth').value),'edit-age'); }
+function calcBMI(wId,hId,tId) {
+    const w=parseFloat(document.getElementById(wId).value), h=parseFloat(document.getElementById(hId).value)/100;
+    document.getElementById(tId).value=(w&&h)?(w/(h*h)).toFixed(2):'';
+}
+function calculateBMI() { calcBMI('form-weight','form-height','form-bmi'); }
+function calculateEditBMI() { calcBMI('edit-weight','edit-height','edit-bmi'); }
+
+// ════════════════════════════════════════════════
+// API HELPERS
+// ════════════════════════════════════════════════
+async function fetchAI(prompt) {
+    try {
+        const r=await fetch(`${GAS_WEB_APP_URL}?action=chat&message=${encodeURIComponent(prompt)}`);
+        const d=await r.json();
+        return d.status==='success' ? {ok:true, data:d.data} : {ok:false, msg:d.message};
+    } catch(e) { return {ok:false, msg:'Connection Error'}; }
+}
+function formatAI(text) {
+    return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n\n/g,'</p><p style="margin-bottom:8px;">').replace(/\n- /g,'<br>• ').replace(/\n/g,'<br>');
+}
+
+// ════════════════════════════════════════════════
+// FORM SUBMIT
+// ════════════════════════════════════════════════
+async function submitForm(e) {
+    e.preventDefault();
+    let foods=[]; document.querySelectorAll('input[name="form-food"]:checked').forEach(cb=>foods.push(cb.value));
+    const sys=document.getElementById('form-bp-sys').value, dia=document.getElementById('form-bp-dia').value;
+    const payload = {
+        action:'add', cid:document.getElementById('form-cid').value, name:document.getElementById('form-name').value,
+        gender:document.getElementById('form-gender').value, birth:document.getElementById('form-birth').value,
+        age:document.getElementById('form-age').value, disease:document.getElementById('form-disease').value,
+        address:document.getElementById('form-address').value, moo:document.getElementById('form-moo').value,
+        weight:document.getElementById('form-weight').value||'', height:document.getElementById('form-height').value||'',
+        bmi:document.getElementById('form-bmi').value||'', fbs:document.getElementById('form-fbs').value||'',
+        bp:(sys&&dia)?`${sys}/${dia}`:'', alcohol:document.getElementById('form-alcohol').value,
+        exercise:document.getElementById('form-exercise').value, sleep:document.getElementById('form-sleep').value,
+        food_habit:foods.join(', '), visit_date:document.getElementById('form-date').value
+    };
+    showLoading('กำลังบันทึกและวิเคราะห์ด้วย AI...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)});
+        const d=await r.json();
+        if(d.status==='success') {
+            document.getElementById('patient-form').reset();
+            document.getElementById('form-date').valueAsDate=new Date();
+            const pr=`ในฐานะแพทย์ ให้สรุปคำแนะนำเบื้องต้นสำหรับ:\n${payload.name} (อายุ ${payload.age} ปี), BMI: ${payload.bmi||'-'}, FBS: ${payload.fbs||'-'}, BP: ${payload.bp||'-'}\nพฤติกรรม: ดื่ม${payload.alcohol}, ออกกำลัง${payload.exercise}, นอน${payload.sleep}, อาหาร: ${payload.food_habit||'ไม่ระบุ'}\nสรุป 3 ข้อ: 1.ความเสี่ยงเบื้องต้น 2.คำแนะนำเร่งด่วน 3.พฤติกรรมที่ต้องปรับ`;
+            const ai=await fetchAI(pr); hideLoading();
+            document.getElementById('advice-name').innerText=payload.name;
+            document.getElementById('ai-advice-content').innerHTML = ai.ok
+                ? `<p style="margin-bottom:8px;">${formatAI(ai.data)}</p>`
+                : `<p style="color:#dc2626;">AI ไม่สามารถตอบกลับได้: ${ai.msg}</p>`;
+            document.getElementById('ai-advice-modal').style.display='flex';
+            loadDashboardData();
+        } else { hideLoading(); showAlert('เกิดข้อผิดพลาด: '+d.message,'error'); }
+    } catch(err) { hideLoading(); showAlert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้','error'); }
+}
+
+// ════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════
+async function loadDashboardData() {
+    showLoading('กำลังโหลด Dashboard...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL+'?action=getPatients');
+        const d=await r.json(); hideLoading();
+        if(d.status==='success') { allPatients=d.data||[]; currentDashboardStats={total:allPatients.length,highRisk:allPatients.filter(p=>p.risk_level==='HIGH').length}; renderDashboard(); }
+    } catch(e) { hideLoading(); }
+}
+
+function renderDashboard() {
+    const moo=document.getElementById('dash-moo-filter').value;
+    let filtered=moo==='all'?allPatients:allPatients.filter(p=>String(p.moo)===String(moo));
+    let dmN=0,dmR=0,dmH=0,htN=0,htR=0,htH=0,hr=0;
+    filtered.forEach(p=>{
+        const f=parseFloat(p.fbs);
+        if(!isNaN(f)) { if(f<100)dmN++; else if(f<=125)dmR++; else dmH++; }
+        if(p.bp&&p.bp.includes('/')) { const [s,d]=p.bp.split('/').map(Number); if(s<120&&d<80)htN++; else if(s<140&&d<90)htR++; else htH++; }
+        let isHR=false; if(!isNaN(f)&&f>=126)isHR=true;
+        if(p.bp&&p.bp.includes('/')) { const [s,d]=p.bp.split('/').map(Number); if(s>=140||d>=90)isHR=true; }
+        if(isHR)hr++;
+    });
+    document.getElementById('kpi-total').innerText=filtered.length;
+    document.getElementById('kpi-highrisk').innerText=hr;
+    const dmTotal=dmN+dmR+dmH, htTotal=htN+htR+htH;
+    document.getElementById('kpi-dm-control').innerText=dmTotal?`${dmN}/${dmTotal}`:'0';
+    document.getElementById('kpi-ht-control').innerText=htTotal?`${htN}/${htTotal}`:'0';
+    updateCharts(dmH,dmR,dmN,htH,htR,htN);
+    updateMooChart(allPatients);
+    renderTop10(filtered);
+}
+
+function updateCharts(dh,dr,dn,hh,hr,hn) {
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    const gridColor=isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)';
+    const opts=(labels,data,colors)=>({ type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverBorderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, cutout:'72%' } });
+    const ctxDM=document.getElementById('dmChart').getContext('2d');
+    if(dmChartInst) dmChartInst.destroy();
+    dmChartInst=new Chart(ctxDM, opts(['สงสัยป่วย','เสี่ยง','ปกติ'],[dh,dr,dn],['#dc2626','#f59e0b','#10b981']));
+    const ctxHT=document.getElementById('htChart').getContext('2d');
+    if(htChartInst) htChartInst.destroy();
+    htChartInst=new Chart(ctxHT, opts(['สงสัยป่วย','เสี่ยง','ปกติ'],[hh,hr,hn],['#dc2626','#f59e0b','#10b981']));
+}
+
+function updateMooChart(data) {
+    const counts=Array(12).fill(0);
+    data.forEach(p=>{ const m=parseInt(p.moo); if(m>=1&&m<=12) counts[m-1]++; });
+    const ctx=document.getElementById('mooChart').getContext('2d');
+    if(mooChartInst) mooChartInst.destroy();
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    mooChartInst=new Chart(ctx,{
+        type:'bar',
+        data:{ labels:['หมู่1','หมู่2','หมู่3','หมู่4','หมู่5','หมู่6','หมู่7','หมู่8','หมู่9','หมู่10','หมู่11','หมู่12'], datasets:[{ label:'จำนวน (คน)', data:counts, backgroundColor:'rgba(37,99,235,0.6)', borderRadius:6, borderSkipped:false }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}, ticks:{font:{size:10}, color:isDark?'#94a3b8':'#64748b'}}, y:{beginAtZero:true, ticks:{stepSize:1, precision:0, font:{size:10}, color:isDark?'#94a3b8':'#64748b'}, grid:{color:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'}} } }
+    });
+}
+
+function renderTop10(filtered) {
+    const top=filtered.filter(p=>{ const f=parseFloat(p.fbs); let s=0,d=0; if(p.bp&&p.bp.includes('/')) [s,d]=p.bp.split('/').map(Number); return f>=126||s>=140||d>=90; }).slice(0,10);
+    const tbody=document.getElementById('top10-table-body');
+    tbody.innerHTML=top.length===0?'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary);">ยังไม่มีกลุ่มเสี่ยงสูงในหมู่บ้านนี้</td></tr>':'';
+    top.forEach((p,i)=>{ tbody.innerHTML+=`<tr>
+        <td><span style="font-weight:700; color:#dc2626;">#${i+1}</span></td>
+        <td><div style="font-weight:600;">${p.name}</div><div style="font-size:10px; color:var(--text-secondary);">${p.cid}</div></td>
+        <td style="font-size:11px;">บ้านเลขที่ ${p.address||'-'} ม.${p.moo}</td>
+        <td style="font-size:11px;"><span style="color:#dc2626; font-weight:600;">FBS ${p.fbs||'-'}</span><br><span style="color:#d97706; font-weight:600;">BP ${p.bp||'-'}</span></td>
+        <td style="text-align:center;"><button onclick="aiAnalyzePatient('${p.cid}','${p.name}')" style="background:rgba(124,58,237,0.1); color:#7c3aed; border:1px solid rgba(124,58,237,0.2); padding:6px 10px; border-radius:8px; font-size:11px; cursor:pointer;"><i class="fa-solid fa-wand-magic-sparkles"></i></button></td>
+    </tr>`; });
+}
+
+// ════════════════════════════════════════════════
+// HIGH RISK & PATIENTS TABLE
+// ════════════════════════════════════════════════
+async function loadPatientsData(type) {
+    showLoading('กำลังโหลดข้อมูล...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL+'?action=getPatients');
+        const d=await r.json(); hideLoading();
+        if(d.status==='success') {
+            allPatients=d.data||[];
+            if(type==='high') renderHighRiskTable();
+            else { document.getElementById('search-input').value=''; renderPatientsTable(allPatients); }
         }
+    } catch(e) { hideLoading(); }
+}
 
-        function closeAlert() { document.getElementById('alert-modal').classList.add('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function showLoading(text) { document.getElementById('loading-text').innerText = text || "กำลังประมวลผล..."; document.getElementById('loading-overlay').style.display = 'flex'; }
-        function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-        function toggleMobileMenu() { const menu = document.getElementById('mobile-menu'); menu.classList.toggle('hidden'); menu.classList.toggle('flex'); }
+function renderHighRiskTable() {
+    const moo=document.getElementById('highrisk-moo-filter').value;
+    let hr=allPatients.filter(p=>{ const f=parseFloat(p.fbs); let s=0,d=0; if(p.bp&&p.bp.includes('/')) [s,d]=p.bp.split('/').map(Number); return f>=126||s>=140||d>=90; });
+    if(moo!=='all') hr=hr.filter(p=>String(p.moo)===String(moo));
+    const tbody=document.getElementById('highrisk-table-body');
+    tbody.innerHTML=hr.length===0?'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-secondary);">ไม่พบข้อมูลกลุ่มเสี่ยงสูง</td></tr>':'';
+    hr.forEach(p=>{ tbody.innerHTML+=`<tr>
+        <td style="font-size:10px; color:var(--text-secondary);">${p.cid}</td>
+        <td style="font-weight:600;">${p.name}</td>
+        <td style="text-align:center;">${p.age}</td>
+        <td style="text-align:center; font-size:11px;">ม.${p.moo}</td>
+        <td style="text-align:center; font-weight:700; color:#dc2626;">${p.fbs||'—'}</td>
+        <td style="text-align:center; font-weight:700; color:#dc2626;">${p.bp||'—'}</td>
+        <td style="text-align:center; white-space:nowrap;">
+            <button onclick="openEditModal('${p.cid}')" style="background:rgba(37,99,235,0.1); color:#2563eb; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="confirmDelete('${p.cid}','${p.name}')" style="background:rgba(220,38,38,0.1); color:#dc2626; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="aiAnalyzePatient('${p.cid}','${p.name}')" style="background:rgba(124,58,237,0.1); color:#7c3aed; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        </td>
+    </tr>`; });
+}
 
-        function openLoginModal() {
-            document.getElementById('login-modal').classList.remove('hidden');
-            document.getElementById('login-error').classList.add('hidden');
-            document.getElementById('login-user').value = ''; document.getElementById('login-pass').value = '';
-        }
-        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
-        function checkLogin() {
-            if (document.getElementById('login-user').value === 'admin' && document.getElementById('login-pass').value === '1234') {
-                isLoggedIn = true; closeLoginModal();
-                document.querySelectorAll('.restricted-feature').forEach(el => el.classList.remove('hidden'));
-                document.querySelectorAll('.restricted-feature-mobile').forEach(el => el.classList.remove('hidden'));
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('btn-mobile-login').classList.add('hidden');
-                showAlert('เข้าสู่ระบบสำเร็จ คุณสามารถเข้าถึงเมนูจัดการข้อมูลได้แล้ว', 'success');
-            } else { document.getElementById('login-error').classList.remove('hidden'); }
-        }
+function renderPatientsTable(list) {
+    const tbody=document.getElementById('patients-table-body');
+    const badges={HIGH:`<span class="badge badge-high"><i class="fa-solid fa-circle" style="font-size:7px;"></i>สงสัยป่วย</span>`,MEDIUM:`<span class="badge badge-med"><i class="fa-solid fa-circle" style="font-size:7px;"></i>เฝ้าระวัง</span>`,LOW:`<span class="badge badge-low"><i class="fa-solid fa-circle" style="font-size:7px;"></i>ปกติ</span>`};
+    tbody.innerHTML=list.length===0?'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-secondary);">ไม่พบข้อมูล</td></tr>':'';
+    list.forEach(p=>{ tbody.innerHTML+=`<tr>
+        <td style="font-size:10px; color:var(--text-secondary);">${p.cid}</td>
+        <td><div style="font-weight:600;">${p.name}</div><div style="font-size:10px; color:var(--text-secondary);">อายุ ${p.age} ปี</div></td>
+        <td style="color:#2563eb; font-size:12px; font-weight:600;">${p.disease}</td>
+        <td style="text-align:center;">${p.fbs||'—'}</td>
+        <td style="text-align:center;">${p.bp||'—'}</td>
+        <td style="text-align:center;">${badges[p.risk_level]||'<span class="badge">ไม่ระบุ</span>'}</td>
+        <td style="text-align:center; white-space:nowrap;">
+            <button onclick="openEditModal('${p.cid}')" style="background:rgba(37,99,235,0.1); color:#2563eb; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="confirmDelete('${p.cid}','${p.name}')" style="background:rgba(220,38,38,0.1); color:#dc2626; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="aiAnalyzePatient('${p.cid}','${p.name}')" style="background:rgba(124,58,237,0.1); color:#7c3aed; border:none; padding:6px; border-radius:8px; cursor:pointer; margin:2px;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        </td>
+    </tr>`; });
+}
 
-        function switchTab(tabId) {
-            if (!isLoggedIn && ['highrisk', 'patients'].includes(tabId)) { openLoginModal(); return; }
-            const views = ['dashboard', 'form', 'highrisk', 'patients', 'chatbot'];
-            views.forEach(id => document.getElementById(`view-${id}`).classList.add('hidden'));
-            const navs = ['dashboard', 'form', 'highrisk', 'patients', 'chatbot'];
-            navs.forEach(id => {
-                const btn = document.getElementById(`btn-${id}`);
-                if(btn) {
-                    btn.classList.remove('nav-active', 'bg-emerald-600', 'text-white', 'bg-red-600');
-                    btn.classList.add('nav-item', 'text-gray-600');
-                    if(id === 'chatbot') btn.classList.replace('text-gray-600', 'text-purple-600');
-                }
-            });
+function filterTable() {
+    const q=document.getElementById('search-input').value.toLowerCase();
+    renderPatientsTable(allPatients.filter(p=>p.name.toLowerCase().includes(q)||p.cid.includes(q)));
+}
 
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`btn-${tabId}`);
-            if(activeBtn && tabId !== 'highrisk') {
-                activeBtn.classList.add('nav-active'); activeBtn.classList.remove('text-gray-600', 'text-purple-600');
-            } else if (tabId === 'highrisk') {
-                activeBtn.classList.add('bg-red-600', 'text-white'); activeBtn.classList.remove('text-gray-600');
-            }
+// ════════════════════════════════════════════════
+// EDIT & DELETE
+// ════════════════════════════════════════════════
+function openEditModal(cid) {
+    const p=allPatients.find(x=>String(x.cid)===String(cid)); if(!p) return;
+    ['cid','name'].forEach(f=>document.getElementById(`edit-${f}`).value=p[f]||'');
+    document.getElementById('edit-gender').value=p.gender||'ชาย';
+    document.getElementById('edit-disease').value=p.disease||'ไม่มีประวัติ';
+    document.getElementById('edit-address').value=p.address||'';
+    document.getElementById('edit-moo').value=p.moo||'1';
+    ['weight','height','bmi','fbs','alcohol','exercise','sleep'].forEach(f=>document.getElementById(`edit-${f}`).value=p[f]||'');
+    if(p.bp&&p.bp.includes('/')) { document.getElementById('edit-bp-sys').value=p.bp.split('/')[0]; document.getElementById('edit-bp-dia').value=p.bp.split('/')[1]; }
+    else { document.getElementById('edit-bp-sys').value=''; document.getElementById('edit-bp-dia').value=''; }
+    document.querySelectorAll('input[name="edit-food"]').forEach(cb=>cb.checked=false);
+    if(p.food_habit) p.food_habit.split(',').forEach(item=>{ const cb=document.querySelector(`input[name="edit-food"][value="${item.trim()}"]`); if(cb) cb.checked=true; });
+    if(p.visit_date) { const d=new Date(p.visit_date); if(!isNaN(d)) document.getElementById('edit-date').valueAsDate=d; }
+    if(p.birth) { let db=p.birth; if(db.includes('-')){ const d=new Date(db); if(!isNaN(d)) db=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()+543}`; } document.getElementById('edit-birth').value=db; calculateEditAge(); }
+    document.getElementById('edit-modal').style.display='flex';
+}
 
-            if (tabId === 'dashboard') { loadDashboardData(); }
-            else if (tabId === 'patients') { loadPatientsData('all'); }
-            else if (tabId === 'highrisk') { loadPatientsData('high'); }
-        }
+async function submitEditForm(e) {
+    e.preventDefault();
+    let foods=[]; document.querySelectorAll('input[name="edit-food"]:checked').forEach(cb=>foods.push(cb.value));
+    const sys=document.getElementById('edit-bp-sys').value, dia=document.getElementById('edit-bp-dia').value;
+    const payload={action:'edit', cid:document.getElementById('edit-cid').value, name:document.getElementById('edit-name').value, gender:document.getElementById('edit-gender').value, birth:document.getElementById('edit-birth').value, age:document.getElementById('edit-age').value, disease:document.getElementById('edit-disease').value, address:document.getElementById('edit-address').value, moo:document.getElementById('edit-moo').value, weight:document.getElementById('edit-weight').value||'', height:document.getElementById('edit-height').value||'', bmi:document.getElementById('edit-bmi').value||'', fbs:document.getElementById('edit-fbs').value||'', bp:(sys&&dia)?`${sys}/${dia}`:'', alcohol:document.getElementById('edit-alcohol').value, exercise:document.getElementById('edit-exercise').value, sleep:document.getElementById('edit-sleep').value, food_habit:foods.join(', '), visit_date:document.getElementById('edit-date').value};
+    showLoading('กำลังอัปเดตข้อมูล...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)});
+        const d=await r.json(); hideLoading();
+        if(d.status==='success') { closeModal('edit-modal'); showAlert('แก้ไขข้อมูลเรียบร้อย','success'); loadPatientsData('all'); loadDashboardData(); }
+        else showAlert('เกิดข้อผิดพลาด: '+d.message,'error');
+    } catch(err) { hideLoading(); showAlert('การเชื่อมต่อล้มเหลว','error'); }
+}
 
-        function getRiskBadge(level) {
-            switch(level) {
-                case 'HIGH': return '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold shadow-sm">สงสัยป่วย (HIGH)</span>';
-                case 'MEDIUM': return '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold shadow-sm">เฝ้าระวัง (MED)</span>';
-                case 'LOW': return '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold shadow-sm">ปกติ (LOW)</span>';
-                default: return '<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">ไม่ระบุ</span>';
-            }
-        }
+function confirmDelete(cid,name) { currentDeleteCid=cid; document.getElementById('delete-patient-name').innerText=name; document.getElementById('delete-modal').style.display='flex'; }
 
-        function formatThaiDate(input) {
-            let val = input.value.replace(/\D/g, '');
-            if (val.length > 8) val = val.substring(0, 8);
-            if (val.length >= 5) { input.value = val.substring(0, 2) + '/' + val.substring(2, 4) + '/' + val.substring(4, 8); } 
-            else if (val.length >= 3) { input.value = val.substring(0, 2) + '/' + val.substring(2, 4); } 
-            else { input.value = val; }
-        }
-        function getBirthDateFromThaiFormat(dateStr) {
-            if (!dateStr) return null;
-            if (dateStr.includes('/')) {
-                const parts = dateStr.split('/');
-                if(parts.length === 3 && parts[2].length === 4) return new Date(parseInt(parts[2]) - 543, parseInt(parts[1]) - 1, parseInt(parts[0]));
-            } else if (dateStr.includes('-')) return new Date(dateStr);
-            return null;
-        }
-        function _calcAge(birthDateObj, targetId) {
-            if (!birthDateObj || isNaN(birthDateObj)) { document.getElementById(targetId).value = ''; return; }
-            const today = new Date();
-            let age = today.getFullYear() - birthDateObj.getFullYear();
-            const m = today.getMonth() - birthDateObj.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) age--;
-            document.getElementById(targetId).value = age >= 0 ? age : 0;
-        }
-        function calculateAge() { _calcAge(getBirthDateFromThaiFormat(document.getElementById('form-birth').value), 'form-age'); }
-        function calculateEditAge() { _calcAge(getBirthDateFromThaiFormat(document.getElementById('edit-birth').value), 'edit-age'); }
-        function _calcBMI(wId, hId, targetId) {
-            const w = parseFloat(document.getElementById(wId).value);
-            const h = parseFloat(document.getElementById(hId).value) / 100;
-            if(w && h) document.getElementById(targetId).value = (w / (h * h)).toFixed(2);
-            else document.getElementById(targetId).value = '';
-        }
-        function calculateBMI() { _calcBMI('form-weight', 'form-height', 'form-bmi'); }
-        function calculateEditBMI() { _calcBMI('edit-weight', 'edit-height', 'edit-bmi'); }
+async function executeDelete() {
+    showLoading('กำลังลบข้อมูล...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL,{method:'POST',body:JSON.stringify({action:'delete',cid:currentDeleteCid})});
+        const d=await r.json(); hideLoading();
+        if(d.status==='success') { closeModal('delete-modal'); loadPatientsData('all'); loadDashboardData(); showAlert('ลบข้อมูลเรียบร้อยแล้ว','success'); }
+        else showAlert('เกิดข้อผิดพลาด: '+d.message,'error');
+    } catch(e) { hideLoading(); showAlert('การเชื่อมต่อล้มเหลว','error'); }
+}
 
-        async function fetchAIResponse(prompt) {
-            try {
-                const response = await fetch(`${GAS_WEB_APP_URL}?action=chat&message=${encodeURIComponent(prompt)}`);
-                const result = await response.json();
-                if(result.status === 'success') return { status: 'success', data: result.data };
-                return { status: 'error', message: result.message || 'API Error' };
-            } catch (e) { return { status: 'error', message: 'Connection Error' }; }
-        }
+// ════════════════════════════════════════════════
+// AI ANALYSIS
+// ════════════════════════════════════════════════
+async function aiAnalyzePatient(cid, name) {
+    const p=allPatients.find(x=>String(x.cid)===String(cid)); if(!p) return;
+    document.getElementById('ai-modal-content').innerHTML=`<div style="text-align:center; padding:40px;"><div class="spinner" style="margin:0 auto 16px;"></div><p style="color:#7c3aed; font-weight:600;">กำลังวิเคราะห์ข้อมูลคุณ ${name}...</p></div>`;
+    document.getElementById('ai-modal').style.display='flex';
+    const pr=`วิเคราะห์ผู้ป่วย: ${p.name}, อายุ ${p.age} ปี, โรคครอบครัว: ${p.disease}, FBS: ${p.fbs||'-'}, BP: ${p.bp||'-'}, BMI: ${p.bmi||'-'}, อาหาร: ${p.food_habit||'-'}. สรุป 4 ข้อสั้นๆ: 1.สถานะปัจจุบัน 2.ความเร่งด่วน 3.คำแนะนำปฏิบัติตัว 4.จุดระวังพิเศษ`;
+    const ai=await fetchAI(pr);
+    document.getElementById('ai-modal-content').innerHTML=ai.ok
+        ? `<div style="background:rgba(124,58,237,0.05); border:1px solid rgba(124,58,237,0.15); border-radius:12px; padding:16px; margin-bottom:16px; display:flex; gap:12px; align-items:center;"><i class="fa-solid fa-user-doctor" style="color:#7c3aed; font-size:22px;"></i><div><div style="font-weight:700; color:#7c3aed;">ผลการประเมิน: ${name}</div><div style="font-size:11px; color:var(--text-secondary);">AI-Assisted Clinical Analysis</div></div></div><p style="line-height:1.8;">${formatAI(ai.data)}</p>`
+        : `<div style="text-align:center; color:#dc2626; padding:30px;">Error: ${ai.msg}</div>`;
+}
 
-        // ==========================================
-        // 3. API & DATA (ADD / EDIT / DELETE)
-        // ==========================================
-        async function submitForm(e) {
-            e.preventDefault();
-            if(!isConfigured) { showAlert("กรุณาตั้งค่า URL"); return; }
-            
-            let food_habits = [];
-            document.querySelectorAll('input[name="form-food"]:checked').forEach(cb => food_habits.push(cb.value));
-            
-            let bpSys = document.getElementById('form-bp-sys').value;
-            let bpDia = document.getElementById('form-bp-dia').value;
-            let bpVal = (bpSys && bpDia) ? `${bpSys}/${bpDia}` : "";
+async function aiPopulationAnalysis() {
+    showLoading('กำลังวิเคราะห์ภาพรวม...');
+    const s=currentDashboardStats;
+    const pr=`วิเคราะห์ข้อมูล รพ.สต. บึงเนียม: ผู้ป่วยทั้งหมด ${s.total||0} คน, เสี่ยงสูง ${s.highRisk||0} คน. สรุป 3 ข้อสั้นๆ: 1.สถานการณ์ภาพรวม 2.แนวโน้ม 3.มาตรการเชิงรุก (Action Plan)`;
+    const ai=await fetchAI(pr); hideLoading();
+    document.getElementById('ai-modal-content').innerHTML=ai.ok
+        ? `<div style="background:rgba(37,99,235,0.05); border:1px solid rgba(37,99,235,0.15); border-radius:12px; padding:16px; margin-bottom:16px; display:flex; gap:12px; align-items:center;"><i class="fa-solid fa-chart-pie" style="color:#2563eb; font-size:22px;"></i><div><div style="font-weight:700; color:#2563eb;">วิเคราะห์ระดับประชากร รพ.สต.บึงเนียม</div></div></div><p style="line-height:1.8;">${formatAI(ai.data)}</p>`
+        : `<div style="text-align:center; color:#dc2626; padding:30px;">Error: ${ai.msg}</div>`;
+    document.getElementById('ai-modal').style.display='flex';
+}
 
-            const payload = {
-                action: 'add',
-                cid: document.getElementById('form-cid').value,
-                name: document.getElementById('form-name').value,
-                gender: document.getElementById('form-gender').value,
-                birth: document.getElementById('form-birth').value,
-                age: document.getElementById('form-age').value,
-                disease: document.getElementById('form-disease').value,
-                address: document.getElementById('form-address').value,
-                moo: document.getElementById('form-moo').value,
-                weight: document.getElementById('form-weight').value || "",
-                height: document.getElementById('form-height').value || "",
-                bmi: document.getElementById('form-bmi').value || "",
-                fbs: document.getElementById('form-fbs').value || "",
-                bp: bpVal,
-                alcohol: document.getElementById('form-alcohol').value,
-                exercise: document.getElementById('form-exercise').value,
-                sleep: document.getElementById('form-sleep').value,
-                food_habit: food_habits.join(", "),
-                visit_date: document.getElementById('form-date').value
-            };
+// ════════════════════════════════════════════════
+// CHATBOT
+// ════════════════════════════════════════════════
+async function sendChatMessage(e) {
+    e.preventDefault();
+    const input=document.getElementById('chat-input');
+    const msg=input.value.trim(); if(!msg) return;
+    const box=document.getElementById('chat-history');
+    box.innerHTML+=`<div style="display:flex; gap:10px; justify-content:flex-end;"><div class="chat-bubble-user">${msg.replace(/\n/g,'<br>')}</div><div style="width:32px; height:32px; background:linear-gradient(135deg,#c9a84c,#f0d080); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#0a1628; flex-shrink:0;">U</div></div>`;
+    input.value=''; box.scrollTop=box.scrollHeight;
+    const ldId='ld-'+Date.now();
+    box.innerHTML+=`<div id="${ldId}" style="display:flex; gap:10px;"><div style="width:32px; height:32px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-robot" style="color:#c9a84c; font-size:12px;"></i></div><div class="chat-bubble-ai" style="display:flex; align-items:center; gap:8px;"><div class="spinner" style="width:16px; height:16px; border-width:2px; border-top-color:#c9a84c;"></div> กำลังคิด...</div></div>`;
+    box.scrollTop=box.scrollHeight;
+    const s=currentDashboardStats;
+    const ctx=`ข้อมูล รพ.สต.บึงเนียม: ผู้ป่วย ${s.total||0} คน, เสี่ยงสูง ${s.highRisk||0} คน`;
+    chatContextHistory.push('Q: '+msg); if(chatContextHistory.length>3) chatContextHistory.shift();
+    const ai=await fetchAI(`${ctx} | ประวัติ: ${chatContextHistory.join(' | ')} | คำถาม: ${msg}`);
+    const el=document.getElementById(ldId); if(el) el.remove();
+    if(ai.ok) {
+        chatContextHistory.push('A: '+ai.data.substring(0,50));
+        box.innerHTML+=`<div style="display:flex; gap:10px;"><div style="width:32px; height:32px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-robot" style="color:#c9a84c; font-size:12px;"></i></div><div class="chat-bubble-ai">${formatAI(ai.data)}</div></div>`;
+    } else {
+        box.innerHTML+=`<div style="text-align:center; color:#dc2626; font-size:12px; padding:8px;">การเชื่อมต่อล้มเหลว</div>`;
+    }
+    box.scrollTop=box.scrollHeight;
+}
 
-            showLoading("กำลังบันทึกและประมวลผลข้อมูล...");
+function clearChat() {
+    document.getElementById('chat-history').innerHTML=`<div style="display:flex; gap:10px;"><div style="width:32px; height:32px; background:linear-gradient(135deg,#1e40af,#2563eb); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-robot" style="color:#c9a84c; font-size:12px;"></i></div><div class="chat-bubble-ai">ล้างประวัติแชทแล้ว 🧹 พร้อมรับคำถามใหม่ครับ!</div></div>`;
+    chatContextHistory=[];
+}
 
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    document.getElementById('patient-form').reset();
-                    document.getElementById('form-date').valueAsDate = new Date();
-                    
-                    const promptMsg = `ในฐานะแพทย์ ให้สรุปคำแนะนำเบื้องต้นสำหรับ:
-                    ${payload.name} (อายุ ${payload.age} ปี), BMI: ${payload.bmi||'-'}, FBS: ${payload.fbs||'-'}, BP: ${payload.bp||'-'}
-                    พฤติกรรม: ดื่ม${payload.alcohol}, ออกกำลัง${payload.exercise}, นอน${payload.sleep}, อาหาร: ${payload.food_habit||'ไม่ระบุ'}
-                    สรุป 3 ข้อสั้นๆ: 1. ความเสี่ยงเบื้องต้น 2. คำแนะนำเร่งด่วน 3. พฤติกรรมที่ต้องปรับ`;
-                    
-                    const aiResult = await fetchAIResponse(promptMsg);
-                    hideLoading();
-                    
-                    if(aiResult.status === 'success') {
-                        let formattedHTML = aiResult.data.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n\n/g, '</p><p class="mb-2">').replace(/\n- /g, '<br>• ').replace(/\n/g, '<br>');
-                        document.getElementById('advice-name').innerText = payload.name;
-                        document.getElementById('ai-advice-content').innerHTML = `<p>${formattedHTML}</p>`;
-                        document.getElementById('ai-advice-modal').classList.remove('hidden');
-                    } else {
-                        showAlert("บันทึกสำเร็จ แต่ AI ไม่สามารถตอบกลับได้: " + aiResult.message, "success");
-                    }
-                    loadDashboardData(); 
-                } else {
-                    hideLoading(); showAlert("เกิดข้อผิดพลาด: " + result.message, "error");
-                }
-            } catch (error) {
-                hideLoading(); showAlert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", "error");
-            }
-        }
+// ════════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════════
+function buildCSV(data) {
+    let csv='\uFEFFCID,ชื่อ-สกุล,เพศ,อายุ,โรคประจำตัว,บ้านเลขที่,หมู่,น้ำหนัก,ส่วนสูง,BMI,FBS,ความดัน,ดื่มแอลกอฮอล์,ออกกำลังกาย,นอนหลับ,อาหาร,ระดับความเสี่ยง\n';
+    data.forEach(p=>{ csv+=`${p.cid},${p.name},${p.gender||''},${p.age},${p.disease},${p.address||''},${p.moo||''},${p.weight||''},${p.height||''},${p.bmi||''},${p.fbs||''},${p.bp||''},${p.alcohol||''},${p.exercise||''},${p.sleep||''},"${p.food_habit||''}",${p.risk_level}\n`; });
+    return csv;
+}
+function dlCSV(csv,fn) { const b=new Blob([csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a'),u=URL.createObjectURL(b); a.href=u; a.download=fn; a.click(); }
+function exportDashboardExcel() { const moo=document.getElementById('dash-moo-filter').value; let d=moo==='all'?allPatients:allPatients.filter(p=>String(p.moo)===String(moo)); if(!d.length){showAlert('ไม่มีข้อมูล','warning');return;} dlCSV(buildCSV(d),`Dashboard_${moo==='all'?'ทุกหมู่':'หมู่'+moo}.csv`); }
+function exportHighRiskExcel() { const moo=document.getElementById('highrisk-moo-filter').value; let hr=allPatients.filter(p=>{const f=parseFloat(p.fbs);let s=0,d=0;if(p.bp&&p.bp.includes('/')){[s,d]=p.bp.split('/').map(Number);}return f>=126||s>=140||d>=90;}); if(moo!=='all') hr=hr.filter(p=>String(p.moo)===String(moo)); if(!hr.length){showAlert('ไม่มีข้อมูลกลุ่มเสี่ยงสูง','warning');return;} dlCSV(buildCSV(hr),`HighRisk_${moo==='all'?'ทุกหมู่':'หมู่'+moo}.csv`); }
+function exportPatientsExcel() { dlCSV(buildCSV(allPatients),'รายชื่อผู้ป่วยทั้งหมด.csv'); }
 
-        async function submitEditForm(e) {
-            e.preventDefault();
-            let food_habits = []; document.querySelectorAll('input[name="edit-food"]:checked').forEach(cb => food_habits.push(cb.value));
-            let bpSys = document.getElementById('edit-bp-sys').value; let bpDia = document.getElementById('edit-bp-dia').value;
-            let bpVal = (bpSys && bpDia) ? `${bpSys}/${bpDia}` : "";
+// ════════════════════════════════════════════════
+// LINE NOTIFY TEST
+// ════════════════════════════════════════════════
+async function testLineNotify() {
+    showLoading('กำลังส่งข้อความทดสอบ LINE...');
+    try {
+        const r=await fetch(GAS_WEB_APP_URL,{method:'POST',body:JSON.stringify({action:'test_line'})});
+        const d=await r.json(); hideLoading();
+        if(d.status==='success') showAlert('ส่งข้อความทดสอบเข้า LINE เรียบร้อย!','success');
+        else showAlert('Error: '+d.message,'error');
+    } catch(e) { hideLoading(); showAlert('ไม่สามารถเชื่อมต่อ Server ได้','error'); }
+}
 
-            const payload = {
-                action: 'edit',
-                cid: document.getElementById('edit-cid').value,
-                name: document.getElementById('edit-name').value,
-                gender: document.getElementById('edit-gender').value,
-                birth: document.getElementById('edit-birth').value,
-                age: document.getElementById('edit-age').value,
-                disease: document.getElementById('edit-disease').value,
-                address: document.getElementById('edit-address').value,
-                moo: document.getElementById('edit-moo').value,
-                weight: document.getElementById('edit-weight').value || "",
-                height: document.getElementById('edit-height').value || "",
-                bmi: document.getElementById('edit-bmi').value || "",
-                fbs: document.getElementById('edit-fbs').value || "",
-                bp: bpVal,
-                alcohol: document.getElementById('edit-alcohol').value,
-                exercise: document.getElementById('edit-exercise').value,
-                sleep: document.getElementById('edit-sleep').value,
-                food_habit: food_habits.join(", "),
-                visit_date: document.getElementById('edit-date').value
-            };
-
-            showLoading("กำลังอัปเดตข้อมูล...");
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await response.json();
-                hideLoading();
-                if(result.status === 'success') {
-                    closeModal('edit-modal'); showAlert("แก้ไขข้อมูลเรียบร้อยแล้ว", "success");
-                    loadPatientsData('all'); loadDashboardData(); 
-                } else showAlert("เกิดข้อผิดพลาด: " + result.message, "error");
-            } catch (error) { hideLoading(); showAlert("การเชื่อมต่อล้มเหลว", "error"); }
-        }
-
-        function confirmDelete(cid, name) {
-            currentDeleteCid = cid;
-            document.getElementById('delete-patient-name').innerText = name;
-            document.getElementById('delete-modal').classList.remove('hidden');
-        }
-
-        async function executeDelete() {
-            showLoading("กำลังลบข้อมูล...");
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', cid: currentDeleteCid }) });
-                const result = await response.json();
-                hideLoading();
-                if(result.status === 'success') { closeModal('delete-modal'); loadPatientsData('all'); loadDashboardData(); } 
-                else showAlert("เกิดข้อผิดพลาด: " + result.message, "error");
-            } catch (e) { hideLoading(); showAlert("การเชื่อมต่อล้มเหลว", "error"); }
-        }
-
-        async function testLineNotify() {
-            showLoading("กำลังทดสอบส่ง LINE...");
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({action: 'test_line'}) });
-                const result = await response.json();
-                hideLoading();
-                if(result.status === 'success') showAlert("✅ ส่งข้อความทดสอบเข้า LINE เรียบร้อย!", "success");
-                else showAlert("❌ Error จากเซิร์ฟเวอร์: " + result.message, "error");
-            } catch (e) { hideLoading(); showAlert("❌ ไม่สามารถเชื่อมต่อกับ Server ได้: " + e.message, "error"); }
-        }
-
-        // ==========================================
-        // 4. DATA RENDERING (DASHBOARD & TABLES)
-        // ==========================================
-        async function loadDashboardData() {
-            if(!isConfigured) return;
-            showLoading("กำลังโหลดข้อมูล Dashboard...");
-            try {
-                // ดึงข้อมูลผู้ป่วยทั้งหมดจาก GS มาแสดงผลทุกครั้ง
-                const response = await fetch(GAS_WEB_APP_URL + "?action=getPatients");
-                const data = await response.json();
-                hideLoading();
-                if(data.status === 'success') {
-                    allPatients = data.data || [];
-                    window.currentDashboardStats = { total: allPatients.length, highRisk: allPatients.filter(p => p.risk_level === 'HIGH').length };
-                    renderDashboard();
-                }
-            } catch(e) { hideLoading(); console.log(e); }
-        }
-
-        function renderDashboard() {
-            const moo = document.getElementById('dash-moo-filter').value;
-            let filtered = allPatients;
-            if(moo !== 'all') filtered = allPatients.filter(p => String(p.moo) === String(moo));
-            
-            let dmCount=0, dmNormal=0, dmRisk=0, dmHigh=0;
-            let htCount=0, htNormal=0, htRisk=0, htHigh=0;
-            let hrCount=0;
-
-            filtered.forEach(p => {
-                let fbs = parseFloat(p.fbs);
-                if(!isNaN(fbs)) {
-                    dmCount++;
-                    if(fbs < 100) dmNormal++; else if(fbs <= 125) dmRisk++; else dmHigh++;
-                }
-                if(p.bp && p.bp.includes('/')) {
-                    htCount++;
-                    let sys = parseInt(p.bp.split('/')[0]); let dia = parseInt(p.bp.split('/')[1]);
-                    if(sys < 120 && dia < 80) htNormal++; else if(sys < 140 && dia < 90) htRisk++; else htHigh++;
-                }
-                let isHR = false;
-                if(!isNaN(fbs) && fbs >= 126) isHR = true;
-                if(p.bp && p.bp.includes('/')){ let s=parseInt(p.bp.split('/')[0]); let d=parseInt(p.bp.split('/')[1]); if(s>=140 || d>=90) isHR=true; }
-                if(isHR) hrCount++;
-            });
-
-            document.getElementById('kpi-total').innerText = filtered.length;
-            document.getElementById('kpi-highrisk').innerText = hrCount;
-            document.getElementById('kpi-dm-control').innerText = dmCount ? `${dmNormal}/${dmCount}` : "0";
-            document.getElementById('kpi-ht-control').innerText = htCount ? `${htNormal}/${htCount}` : "0";
-
-            updateCharts(dmHigh, dmRisk, dmNormal, htHigh, htRisk, htNormal);
-            updateMooChart(allPatients); // อัปเดตกราฟหมู่บ้าน
-            
-            let top10 = filtered.filter(p => {
-                let f=parseFloat(p.fbs), s=0, d=0;
-                if(p.bp && p.bp.includes('/')){ let pts = p.bp.split('/'); s=parseInt(pts[0]); d=parseInt(pts[1]); }
-                return (f >= 126 || s >= 140 || d >= 90);
-            }).sort((a,b) => (a.priority_rank||999) - (b.priority_rank||999)).slice(0, 10);
-            
-            const tbody = document.getElementById('top10-table-body');
-            tbody.innerHTML = top10.length === 0 ? '<tr><td colspan="5" class="text-center py-4 text-gray-400">ยังไม่มีผู้ป่วยเสี่ยงสูงในหมู่บ้านนี้</td></tr>' : '';
-            top10.forEach((p, i) => {
-                tbody.innerHTML += `<tr class="hover:bg-red-50">
-                    <td class="px-4 py-3 font-bold text-red-600">#${i+1}</td>
-                    <td class="px-4 py-3"><div class="font-medium">${p.name}</div><div class="text-xs text-gray-500">${p.cid}</div></td>
-                    <td class="px-4 py-3 text-xs">บ้านเลขที่ ${p.address} ม.${p.moo}</td>
-                    <td class="px-4 py-3 text-xs">FBS: ${p.fbs||'-'}, BP: ${p.bp||'-'}</td>
-                    <td class="px-4 py-3 text-center"><button onclick="aiAnalyzePatient('${p.cid}', '${p.name}')" class="text-purple-600 hover:bg-purple-100 p-2 rounded-full"><i class="fa-solid fa-wand-magic-sparkles"></i></button></td>
-                </tr>`;
-            });
-        }
-
-        function updateCharts(dmH, dmR, dmN, htH, htR, htN) {
-            const ctxDM = document.getElementById('dmChart').getContext('2d');
-            if(dmChartInstance) dmChartInstance.destroy();
-            dmChartInstance = new Chart(ctxDM, { type: 'doughnut', data: { labels: ['สงสัยป่วย', 'เสี่ยง', 'ปกติ'], datasets: [{ data: [dmH, dmR, dmN], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth:0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' } });
-
-            const ctxHT = document.getElementById('htChart').getContext('2d');
-            if(htChartInstance) htChartInstance.destroy();
-            htChartInstance = new Chart(ctxHT, { type: 'doughnut', data: { labels: ['สงสัยป่วย', 'เสี่ยง', 'ปกติ'], datasets: [{ data: [htH, htR, htN], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth:0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' } });
-        }
-
-        function updateMooChart(data) {
-            let mooCounts = Array(12).fill(0);
-            data.forEach(p => {
-                let m = parseInt(p.moo);
-                if(m >= 1 && m <= 12) mooCounts[m-1]++;
-            });
-
-            const ctxMoo = document.getElementById('mooChart').getContext('2d');
-            if(mooChartInstance) mooChartInstance.destroy();
-            
-            mooChartInstance = new Chart(ctxMoo, {
-                type: 'bar',
-                data: {
-                    labels: ['หมู่ 1', 'หมู่ 2', 'หมู่ 3', 'หมู่ 4', 'หมู่ 5', 'หมู่ 6', 'หมู่ 7', 'หมู่ 8', 'หมู่ 9', 'หมู่ 10', 'หมู่ 11', 'หมู่ 12'],
-                    datasets: [{
-                        label: 'จำนวนผู้คัดกรอง (คน)',
-                        data: mooCounts,
-                        backgroundColor: '#3b82f6', // สีฟ้า
-                        borderRadius: 6,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} คน` } }
-                    },
-                    scales: { 
-                        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        async function loadPatientsData(type) {
-            if(!isConfigured) return;
-            showLoading("กำลังโหลดข้อมูล...");
-            try {
-                // ดึงข้อมูลผู้ป่วยทั้งหมดจาก GS มาแสดงผลทุกครั้ง
-                const response = await fetch(GAS_WEB_APP_URL + "?action=getPatients");
-                const data = await response.json();
-                hideLoading();
-                if(data.status === 'success') {
-                    allPatients = data.data || [];
-                    if(type === 'high') { document.getElementById('highrisk-moo-filter').value = 'all'; renderHighRiskTable(); }
-                    else { document.getElementById('search-input').value = ''; renderPatientsTable(allPatients); }
-                }
-            } catch(e) { hideLoading(); }
-        }
-
-        function renderHighRiskTable() {
-            const moo = document.getElementById('highrisk-moo-filter').value;
-            let hr = allPatients.filter(p => {
-                let fbs = parseFloat(p.fbs), s=0, d=0;
-                if(p.bp && p.bp.includes('/')){ let pts = p.bp.split('/'); s=parseInt(pts[0]); d=parseInt(pts[1]); }
-                return (fbs >= 126 || s >= 140 || d >= 90);
-            });
-            if(moo !== 'all') hr = hr.filter(p => String(p.moo) === String(moo));
-            hr.sort((a,b) => (a.priority_rank||999) - (b.priority_rank||999));
-            
-            const tbody = document.getElementById('highrisk-table-body');
-            tbody.innerHTML = hr.length === 0 ? '<tr><td colspan="7" class="text-center py-6 text-gray-500">ไม่พบข้อมูล</td></tr>' : '';
-            hr.forEach(p => {
-                tbody.innerHTML += `<tr class="hover:bg-red-50 border-b border-gray-100">
-                    <td class="px-6 py-4 text-xs font-mono text-gray-500">${p.cid}</td>
-                    <td class="px-6 py-4 font-medium">${p.name}</td>
-                    <td class="px-6 py-4 text-center">${p.age}</td>
-                    <td class="px-6 py-4 text-center text-xs">ม.${p.moo}</td>
-                    <td class="px-6 py-4 text-center font-bold text-red-600">${p.fbs||'-'}</td>
-                    <td class="px-6 py-4 text-center font-bold text-red-600">${p.bp||'-'}</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button onclick="openEditModal('${p.cid}')" class="text-blue-600 hover:bg-blue-100 p-2 rounded-full mr-1" title="แก้ไข"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="confirmDelete('${p.cid}', '${p.name}')" class="text-red-600 hover:bg-red-100 p-2 rounded-full mr-1" title="ลบ"><i class="fa-solid fa-trash"></i></button>
-                        <button onclick="aiAnalyzePatient('${p.cid}', '${p.name}')" class="text-purple-600 hover:bg-purple-100 p-2 rounded-full mr-1" title="AI วิเคราะห์"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-                        <button onclick="exportAIPDF('${p.cid}', '${p.name}')" class="text-orange-500 hover:bg-orange-100 p-2 rounded-full" title="ส่งออก PDF"><i class="fa-solid fa-file-pdf"></i></button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        function renderPatientsTable(list) {
-            const tbody = document.getElementById('patients-table-body');
-            tbody.innerHTML = list.length === 0 ? '<tr><td colspan="7" class="text-center py-6 text-gray-500">ไม่พบข้อมูล</td></tr>' : '';
-            list.forEach(p => {
-                tbody.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-100">
-                    <td class="px-6 py-4 text-xs font-mono">${p.cid}</td>
-                    <td class="px-6 py-4 font-medium">${p.name} <br><span class="text-xs text-gray-400">อายุ ${p.age} ปี</span></td>
-                    <td class="px-6 py-4 text-blue-600 font-semibold">${p.disease}</td>
-                    <td class="px-6 py-4 text-center">${p.fbs||'-'}</td>
-                    <td class="px-6 py-4 text-center">${p.bp||'-'}</td>
-                    <td class="px-6 py-4 text-center">${getRiskBadge(p.risk_level)}</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button onclick="openEditModal('${p.cid}')" class="text-blue-600 hover:bg-blue-100 p-2 rounded-full mr-1" title="แก้ไข"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="confirmDelete('${p.cid}', '${p.name}')" class="text-red-600 hover:bg-red-100 p-2 rounded-full mr-1" title="ลบ"><i class="fa-solid fa-trash"></i></button>
-                        <button onclick="aiAnalyzePatient('${p.cid}', '${p.name}')" class="text-purple-600 hover:bg-purple-100 p-2 rounded-full mr-1" title="AI วิเคราะห์"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-                        <button onclick="exportAIPDF('${p.cid}', '${p.name}')" class="text-orange-500 hover:bg-orange-100 p-2 rounded-full" title="ส่งออก PDF"><i class="fa-solid fa-file-pdf"></i></button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        function filterTable() {
-            const q = document.getElementById('search-input').value.toLowerCase();
-            renderPatientsTable(allPatients.filter(p => p.name.toLowerCase().includes(q) || p.cid.includes(q)));
-        }
-
-        function openEditModal(cid) {
-            const p = allPatients.find(x => String(x.cid) === String(cid));
-            if(!p) return;
-            document.getElementById('edit-cid').value = p.cid; document.getElementById('edit-name').value = p.name;
-            document.getElementById('edit-gender').value = p.gender || 'ชาย'; document.getElementById('edit-disease').value = p.disease;
-            document.getElementById('edit-address').value = p.address || ''; document.getElementById('edit-moo').value = p.moo || '1';
-            document.getElementById('edit-weight').value = p.weight || ''; document.getElementById('edit-height').value = p.height || '';
-            document.getElementById('edit-bmi').value = p.bmi || ''; document.getElementById('edit-fbs').value = p.fbs || '';
-            document.getElementById('edit-alcohol').value = p.alcohol || 'ไม่ดื่ม';
-            document.getElementById('edit-exercise').value = p.exercise || 'ไม่ได้ออกกำลังกาย'; document.getElementById('edit-sleep').value = p.sleep || '6-8 ชม.';
-            if(p.bp && p.bp.includes('/')){ document.getElementById('edit-bp-sys').value=p.bp.split('/')[0]; document.getElementById('edit-bp-dia').value=p.bp.split('/')[1]; }
-            else { document.getElementById('edit-bp-sys').value=''; document.getElementById('edit-bp-dia').value=''; }
-            
-            document.querySelectorAll('input[name="edit-food"]').forEach(cb => cb.checked = false);
-            if(p.food_habit) { p.food_habit.split(',').forEach(item => { const cb=document.querySelector(`input[name="edit-food"][value="${item.trim()}"]`); if(cb) cb.checked=true; }); }
-            
-            if(p.visit_date) { let d=new Date(p.visit_date); if(!isNaN(d)) document.getElementById('edit-date').valueAsDate=d; }
-            if(p.birth) {
-                let db=p.birth;
-                if(db.includes('-')){ let d=new Date(db); if(!isNaN(d)) db=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()+543}`; }
-                document.getElementById('edit-birth').value = db; calculateEditAge();
-            } else { document.getElementById('edit-birth').value=''; document.getElementById('edit-age').value=p.age||''; }
-            
-            document.getElementById('edit-modal').classList.remove('hidden');
-        }
-
-        // ==========================================
-        // 5. EXCEL & PDF EXPORT
-        // ==========================================
-        function buildExcel(data) {
-            let csv = '\uFEFF'; 
-            csv += "CID,ชื่อ-สกุล,เพศ,อายุ,โรคประจำตัว,บ้านเลขที่,หมู่,น้ำหนัก,ส่วนสูง,BMI,FBS,ความดัน(BP),ดื่มแอลกอฮอล์,ออกกำลังกาย,นอนหลับ,อาหารที่ทานบ่อย,ระดับความเสี่ยง\n";
-            data.forEach(p => {
-                let r = [p.cid, p.name, p.gender||'', p.age, p.disease, p.address||'', p.moo||'', p.weight||'', p.height||'', p.bmi||'', p.fbs||'', p.bp||'', p.alcohol||'', p.exercise||'', p.sleep||'', `"${p.food_habit||''}"`, p.risk_level];
-                csv += r.join(',') + "\n";
-            });
-            return csv;
-        }
-        function downloadCSV(csvStr, filename) {
-            const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url); link.setAttribute("download", filename);
-                link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            }
-        }
-        function exportDashboardExcel() {
-            const moo = document.getElementById('dash-moo-filter').value;
-            let d = allPatients;
-            if(moo !== 'all') d = d.filter(p => String(p.moo) === String(moo));
-            if(!d.length) { showAlert('ไม่มีข้อมูลสำหรับหมู่บ้านนี้', 'warning'); return; }
-            downloadCSV(buildExcel(d), `รายงานภาพรวมคัดกรอง_${moo==='all'?'ทุกหมู่':'หมู่'+moo}.csv`);
-        }
-        function exportHighRiskExcel() {
-            const moo = document.getElementById('highrisk-moo-filter').value;
-            let hr = allPatients.filter(p => { let fbs=parseFloat(p.fbs), s=0, d=0; if(p.bp && p.bp.includes('/')){ let pts=p.bp.split('/'); s=parseInt(pts[0]); d=parseInt(pts[1]); } return (fbs >= 126 || s >= 140 || d >= 90); });
-            if(moo !== 'all') hr = hr.filter(p => String(p.moo) === String(moo));
-            if(!hr.length) { showAlert('ไม่มีข้อมูลกลุ่มเสี่ยงสูง', 'warning'); return; }
-            downloadCSV(buildExcel(hr), `รายงานกลุ่มสงสัยป่วย_${moo==='all'?'ทุกหมู่':'หมู่'+moo}.csv`);
-        }
-        function exportPatientsExcel() { downloadCSV(buildExcel(allPatients), "รายชื่อผู้ป่วยทั้งหมด.csv"); }
-
-        async function exportAIPDF(cid, name) {
-            if(!isConfigured) return;
-            const p = allPatients.find(x => String(x.cid) === String(cid));
-            if (!p) { showAlert("ไม่พบข้อมูลผู้ป่วย"); return; }
-            
-            const w = window.open('', '_blank');
-            if(!w) { showAlert("เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-up", "warning"); return; }
-            w.document.write(`<html><head><title>กำลังสร้างรายงาน...</title><style>body{font-family:sans-serif;text-align:center;padding:50px;color:#6b21a8;}</style></head><body><h2>กำลังวิเคราะห์ข้อมูลด้วย AI...</h2></body></html>`);
-
-            const promptMsg = `ในฐานะแพทย์ กรุณาวิเคราะห์ผู้ป่วย: ${p.name}, อายุ ${p.age} ปี, โรคครอบครัว: ${p.disease}, FBS: ${p.fbs||'-'}, BP: ${p.bp||'-'}, BMI: ${p.bmi||'-'}, พฤติกรรม: ดื่ม${p.alcohol}, ออกกำลัง${p.exercise}, นอน${p.sleep}, อาหาร${p.food_habit||'-'}. สรุปสั้นๆ (ใช้ bullet): 1.ความเสี่ยง 2.ความเร่งด่วน 3.คำแนะนำดูแลตัวเอง`;
-
-            try {
-                const res = await fetchAIResponse(promptMsg);
-                if(res.status === 'success') {
-                    let aiHtml = res.data.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n\n/g, '</p><p>').replace(/\n- /g, '<br>• ').replace(/\n/g, '<br>');
-                    const ds = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
-                    w.document.open();
-                    w.document.write(`<html><head><title>รายงาน ${p.name}</title><style>body{font-family:'Tahoma',sans-serif;padding:30px;line-height:1.6;color:#333;max-width:800px;margin:0 auto;}h2{color:#6b21a8;text-align:center;border-bottom:2px solid #e9d5ff;padding-bottom:10px;}.box{border:1px solid #ddd;padding:20px;border-radius:8px;background:#faf5ff;margin-top:20px;}.row{display:flex;border-bottom:1px dashed #eee;padding:8px 0;}.lbl{font-weight:bold;width:35%;color:#555;}.val{width:65%;}.aibox{margin-top:30px;padding:25px;border:2px solid #9333ea;border-radius:8px;}.btn{display:block;width:200px;margin:30px auto;background:#9333ea;color:#fff;padding:12px;border:none;border-radius:5px;cursor:pointer;}@media print{.btn{display:none;}}</style></head><body>
-                    <h2>รายงานการประเมินสุขภาพเชิงลึก (AI-Assisted)</h2>
-                    <div class="box">
-                    <div class="row"><div class="lbl">ชื่อ-สกุล:</div><div class="val">${p.name} (อายุ ${p.age} ปี)</div></div>
-                    <div class="row"><div class="lbl">เลขบัตร (CID):</div><div class="val">${p.cid}</div></div>
-                    <div class="row"><div class="lbl">ข้อมูลสุขภาพ:</div><div class="val">FBS: ${p.fbs||'-'} | BP: ${p.bp||'-'} | BMI: ${p.bmi||'-'}</div></div>
-                    <div class="row"><div class="lbl">พฤติกรรม:</div><div class="val">ครอบครัว: ${p.disease} | ดื่ม: ${p.alcohol} | ออกกำลัง: ${p.exercise} | นอน: ${p.sleep}</div></div>
-                    </div><div class="aibox"><h3 style="color:#9333ea;margin-top:0;">ผลการวิเคราะห์โดย AI</h3><p>${aiHtml}</p></div>
-                    <div style="text-align:right;margin-top:20px;font-size:13px;color:#777;">พิมพ์เมื่อ: ${ds}</div><button class="btn" onclick="window.print()">พิมพ์เอกสาร / Save PDF</button>
-                    </body></html>`);
-                    w.document.close();
-                } else { w.close(); showAlert("AI Error: " + res.message, "error"); }
-            } catch(e) { w.close(); showAlert("Connection Error", "error"); }
-        }
-
-        // ==========================================
-        // 6. AI & CHATBOT
-        // ==========================================
-        async function aiAnalyzePatient(cid, name) {
-            const p = allPatients.find(x => String(x.cid) === String(cid));
-            if (!p) return;
-            document.getElementById('ai-modal-content').innerHTML = `<div class="text-center py-10"><div class="loader"></div><p class="mt-4 text-purple-600 font-bold animate-pulse">กำลังประมวลผลข้อมูลคุณ ${name}...</p></div>`;
-            document.getElementById('ai-modal').classList.remove('hidden');
-
-            const prompt = `วิเคราะห์ผู้ป่วย: ${p.name}, อายุ ${p.age} ปี, โรคประจำตัว: ${p.disease}, FBS: ${p.fbs||'-'}, BP: ${p.bp||'-'}, BMI: ${p.bmi||'-'}, พฤติกรรม: อาหาร-${p.food_habit||'-'}
-            สรุป 4 ข้อสั้นๆ: 1. สถานะปัจจุบัน 2. ความเร่งด่วน 3. คำแนะนำการปฏิบัติตัว 4. จุดระวังพิเศษ`;
-            
-            const res = await fetchAIResponse(prompt);
-            if(res.status === 'success') {
-                document.getElementById('ai-modal-content').innerHTML = `
-                    <div class="bg-purple-50 p-4 rounded-lg mb-4 flex items-start gap-3"><i class="fa-solid fa-user-doctor text-2xl text-purple-600"></i><div><h4 class="font-bold text-purple-800">ผลการประเมิน: ${name}</h4></div></div>
-                    <div class="leading-relaxed text-sm"><p>${res.data.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n\n/g, '</p><p class="mb-2">').replace(/\n- /g, '<br>• ').replace(/\n/g, '<br>')}</p></div>`;
-            } else document.getElementById('ai-modal-content').innerHTML = `<div class="text-red-500 text-center py-10"><i class="fa-solid fa-xmark text-3xl mb-2"></i><br>Error: ${res.message}</div>`;
-        }
-
-        async function aiPopulationAnalysis() {
-            showLoading("กำลังวิเคราะห์ภาพรวม...");
-            let prompt = "วิเคราะห์เจาะลึกข้อมูล NCDs ของ รพ.สต.";
-            if(window.currentDashboardStats) {
-                let s = window.currentDashboardStats;
-                prompt = `วิเคราะห์ข้อมูล รพ.สต. ทั้งหมด: ผู้ป่วย ${s.total} คน, เสี่ยงสูง ${s.highRisk} คน. สรุป 3 ข้อสั้นๆ: 1. สถานการณ์ภาพรวม 2. แนวโน้ม 3. มาตรการเชิงรุก (Action Plan) สำหรับเจ้าหน้าที่`;
-            }
-            const res = await fetchAIResponse(prompt);
-            hideLoading();
-            if(res.status === 'success') {
-                document.getElementById('ai-modal-content').innerHTML = `
-                    <div class="bg-indigo-50 p-4 rounded-lg mb-4 flex gap-3"><i class="fa-solid fa-chart-pie text-2xl text-indigo-600"></i><div><h4 class="font-bold text-indigo-800">วิเคราะห์ระดับประชากร</h4></div></div>
-                    <div class="text-sm leading-relaxed"><p>${res.data.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n\n/g, '</p><p class="mb-2">').replace(/\n/g, '<br>')}</p></div>`;
-                document.getElementById('ai-modal').classList.remove('hidden');
-            } else showAlert("AI Error: " + res.message, "error");
-        }
-
-        async function sendChatMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if(!msg) return;
-            const chatBox = document.getElementById('chat-history');
-            
-            chatBox.innerHTML += `<div class="flex gap-4 justify-end"><div class="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-none text-sm max-w-[85%]">${msg}</div><div class="w-8 h-8 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center font-bold">U</div></div>`;
-            input.value = ''; chatBox.scrollTop = chatBox.scrollHeight;
-
-            const loaderId = 'ld-' + Date.now();
-            chatBox.innerHTML += `<div class="flex gap-4" id="${loaderId}"><div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center"><i class="fa-solid fa-robot text-sm"></i></div><div class="bg-white border p-3 rounded-2xl rounded-tl-none flex items-center gap-2"><div class="loader" style="width:15px;height:15px;border-width:2px;border-top-color:#9333ea;"></div> กำลังคิด...</div></div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            let ctx = "ข้อมูล รพ.สต.: ";
-            if(window.currentDashboardStats) { let s=window.currentDashboardStats; ctx += `ผู้ป่วยรวม ${s.total} คน, เสี่ยงสูง ${s.highRisk} คน `; }
-            chatContextHistory.push("Q: " + msg); if(chatContextHistory.length > 3) chatContextHistory.shift();
-            
-            const prompt = ctx + "| ประวัติ: " + chatContextHistory.join(" | ") + " | คำถาม: " + msg;
-            const res = await fetchAIResponse(prompt);
-            document.getElementById(loaderId).remove();
-            
-            if(res.status === 'success') {
-                chatContextHistory.push("A: " + res.data.substring(0, 50));
-                let reply = res.data.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                chatBox.innerHTML += `<div class="flex gap-4"><div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center"><i class="fa-solid fa-robot text-sm"></i></div><div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[85%] leading-relaxed">${reply}</div></div>`;
-            } else {
-                chatBox.innerHTML += `<div class="text-red-500 text-center text-sm my-2">การเชื่อมต่อล้มเหลว</div>`;
-            }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
+// ════════════════════════════════════════════════
+// RESPONSIVE
+// ════════════════════════════════════════════════
+window.addEventListener('resize', ()=>{
+    const hb=document.getElementById('hamburger');
+    if(window.innerWidth<=768) { hb.style.display='flex'; } else { hb.style.display='none'; closeMobileMenu(); }
+});
+</script>
 </body>
 </html>
