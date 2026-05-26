@@ -306,6 +306,9 @@ select.finput{cursor:pointer}
       <span class="toggle-label"><i class="fa-solid fa-circle-half-stroke mr-1"></i> Dark Mode</span>
       <div class="toggle-switch" id="themeToggle" onclick="toggleTheme()"><div class="toggle-knob"></div></div>
     </div>
+    <button onclick="testLineAlert()" style="width:100%;padding:9px;border-radius:10px;background:rgba(16,185,129,0.1);color:#10b981;font-size:12px;font-weight:600;border:1px solid rgba(16,185,129,0.2);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'">
+      <i class="fa-solid fa-paper-plane"></i> ทดสอบ LINE Notification
+    </button>
     <button class="login-btn" id="btn-login" onclick="openLoginModal()"><i class="fa-solid fa-shield-halved"></i> เจ้าหน้าที่เข้าสู่ระบบ</button>
   </div>
 </aside>
@@ -869,10 +872,67 @@ select.finput{cursor:pointer}
 // ───────────────────────────────────────────────
 // CONFIG & STATE
 // ───────────────────────────────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbx92uRVLNK14uWsr3Y3WUTwRIidZIiJGlKioey0hDJs8sV0OyGmH3gmU8E9wnNqLC23/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbykyXthkDliwnmFqv15gaGhXnpNyCCvBqhaUiThMUAnugbCbIVE3fFqiXT__8jEQu0n/exec";
 let allPx = [], dmC = null, htC = null, mooC = null;
 let loggedIn = false, delCid = "", chatHx = [], activeTab = 'form';
 window._stats = null;
+
+// ───────────────────────────────────────────────
+// LINE ALERT FUNCTION
+// ───────────────────────────────────────────────
+async function sendLineAlert(p) {
+  const tk = "05T2O0MfUzCmxfu0APNijbffEOsjeXvhmgz9GimRignuTEsqYbYd4lejkknPNm1OIpg+pCkRDUoCm26hj//dWeWrPtmmrg2UC+xUlv1HMHCxcjebqcqHiq45xnmyRfW1H0IV3jd6S0P7EjHpira5RwdB04t89/1O/w1cDnyilFU=";
+  const uid = "U1371d5e9069bed92b46a0218c38d46bd";
+  
+  let alerts = [];
+  let f = parseFloat(p.fbs);
+  if (f >= 126) alerts.push(`FBS สูง: ${f} mg/dL`);
+  
+  if (p.bp && p.bp.includes('/')) {
+    let [s, d] = p.bp.split('/').map(Number);
+    if (s >= 140 || d >= 90) alerts.push(`ความดันสูง: ${p.bp} mmHg`);
+  }
+  
+  if (!alerts.length) return; // ไม่เสี่ยงสูง ไม่ต้องส่ง
+  
+  const msg = `🚨 แจ้งเตือนเคสเสี่ยงสูงด่วน!\n\nชื่อ: ${p.firstName} ${p.lastName} (อายุ ${p.age} ปี)\nหมู่ที่: ม.${p.moo}\nเบอร์โทร: ${p.phoneNumber || '-'}\n\n⚠️ ค่าผิดปกติที่พบ:\n- ${alerts.join('\n- ')}\n\nโปรดตรวจสอบและติดตามอาการโดยด่วน!`;
+  
+  try {
+    // ส่งผ่าน Google Apps Script เพื่อเลี่ยงการถูกบล็อก CORS จากเบราว์เซอร์
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'relay_line', token: tk, uid: uid, message: msg })
+    });
+  } catch (e) { console.error('LINE Alert Error:', e); }
+}
+
+async function testLineAlert() {
+  const tk = "05T2O0MfUzCmxfu0APNijbffEOsjeXvhmgz9GimRignuTEsqYbYd4lejkknPNm1OIpg+pCkRDUoCm26hj//dWeWrPtmmrg2UC+xUlv1HMHCxcjebqcqHiq45xnmyRfW1H0IV3jd6S0P7EjHpira5RwdB04t89/1O/w1cDnyilFU=";
+  const uid = "U1371d5e9069bed92b46a0218c38d46bd";
+  const msg = "✅ ระบบ LINE OA เชื่อมต่อสำเร็จ\nระบบคัดกรองเบาหวานและความดันพร้อมใช้งาน";
+
+  showLoad("กำลังทดสอบส่ง LINE...");
+  try {
+    // ส่งผ่าน Google Apps Script เพื่อเลี่ยงการถูกบล็อก CORS จากเบราว์เซอร์
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'relay_line', token: tk, uid: uid, message: msg })
+    });
+    const data = await res.json();
+    hideLoad();
+    if (data.status === 'success') {
+      showAlert('ส่งข้อความทดสอบเข้า LINE สำเร็จ!', 'success');
+    } else {
+      showAlert('ส่งไม่สำเร็จ: ' + data.message, 'warning');
+    }
+  } catch (e) {
+    hideLoad();
+    console.error('LINE Test Error:', e);
+    showAlert('ส่งล้มเหลว กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', 'error');
+  }
+}
 
 // ───────────────────────────────────────────────
 // INIT
@@ -1132,6 +1192,10 @@ async function submitForm(e) {
     const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     const res=await r.json();
     if(res.status==='success'){
+      
+      // ✅ ส่ง LINE Alert หากมีความเสี่ยงสูง (ส่งทำงานเบื้องหลัง)
+      sendLineAlert(payload);
+      
       document.getElementById('patient-form').reset();
       document.getElementById('f-date').valueAsDate=new Date();
       document.getElementById('f-waist-badge').innerHTML='';
@@ -1306,7 +1370,13 @@ async function submitEdit(e){
   };
   
   try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload)});const res=await r.json();hideLoad();
-    if(res.status==='success'){document.getElementById('edit-modal').style.display='none';await loadData();showAlert('แก้ไขข้อมูลสำเร็จ!','success');}
+    if(res.status==='success'){
+      
+      // ✅ ส่ง LINE Alert หากมีความเสี่ยงสูง (ส่งทำงานเบื้องหลัง)
+      sendLineAlert(payload);
+        
+      document.getElementById('edit-modal').style.display='none';await loadData();showAlert('แก้ไขข้อมูลสำเร็จ!','success');
+    }
     else showAlert(res.message,'error');
   }catch(ex){hideLoad();showAlert('เชื่อมต่อล้มเหลว','error');}
 }
