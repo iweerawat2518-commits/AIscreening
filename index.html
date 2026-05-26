@@ -361,16 +361,25 @@ select.finput{cursor:pointer}
                 <label class="flabel" for="f-date">วันที่รับบริการ *</label>
                 <input class="finput" type="date" id="f-date" required>
               </div>
-              <div style="grid-column:1/-1">
-                <label class="flabel" for="f-name">ชื่อ - นามสกุล *</label>
-                <input class="finput" type="text" id="f-name" required placeholder="ชื่อจริง นามสกุล">
+              <div>
+                <label class="flabel" for="f-fname">ชื่อ *</label>
+                <input class="finput" type="text" id="f-fname" required placeholder="ชื่อจริง">
+              </div>
+              <div>
+                <label class="flabel" for="f-lname">นามสกุล *</label>
+                <input class="finput" type="text" id="f-lname" required placeholder="นามสกุล">
+              </div>
+              <div>
+                <label class="flabel" for="f-phone">เบอร์โทรศัพท์ *</label>
+                <input class="finput" type="text" id="f-phone" required pattern="0[0-9]{9}" maxlength="10" title="เบอร์โทรศัพท์ 10 หลัก (ขึ้นต้นด้วย 0)" oninput="this.value=this.value.replace(/\D/g,'')" placeholder="08XXXXXXXX">
               </div>
               <div>
                 <label class="flabel" for="f-gender">เพศ *</label>
                 <select id="f-gender" class="finput" onchange="calcAll('f')" required>
+                  <option value="" disabled selected>-- กรุณาเลือกเพศ --</option>
                   <option value="ชาย">ชาย</option>
                   <option value="หญิง">หญิง</option>
-                  <option value="เพศทางเลือก">เพศทางเลือก</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
                 </select>
               </div>
               <div>
@@ -391,7 +400,7 @@ select.finput{cursor:pointer}
                 <label class="flabel" for="f-addr">บ้านเลขที่</label>
                 <input class="finput" type="text" id="f-addr" placeholder="บ้านเลขที่">
               </div>
-              <div>
+              <div style="grid-column:1/-1">
                 <label class="flabel" for="f-fhx">ประวัติโรคบิดามารดา</label>
                 <select id="f-fhx" class="finput" onchange="calcAll('f')">
                   <option value="ไม่มีประวัติ">ไม่มีประวัติ</option>
@@ -664,7 +673,7 @@ select.finput{cursor:pointer}
             <option value="all">ดูทุกหมู่</option>
             <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`)</script>
           </select>
-          <input type="text" id="tbl-search" onkeyup="renderTbl()" placeholder="🔍 ค้นหาชื่อ, CID..." class="finput" style="width:200px;padding:8px 14px;font-size:12px">
+          <input type="text" id="tbl-search" onkeyup="renderTbl()" placeholder="🔍 ค้นหาชื่อ, CID, เบอร์โทร..." class="finput" style="width:200px;padding:8px 14px;font-size:12px">
           <button id="btn-export-hi" onclick="exportExcel('hi')" class="hidden" style="padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-file-excel"></i> Export</button>
         </div>
       </div>
@@ -782,15 +791,25 @@ select.finput{cursor:pointer}
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
           <div><label class="flabel">CID</label><input type="text" id="e-cid" readonly class="finput" style="opacity:.6;cursor:not-allowed"></div>
           <div><label class="flabel">วันที่รับบริการ</label><input type="date" id="e-date" required class="finput"></div>
-          <div><label class="flabel">ชื่อ-สกุล</label><input type="text" id="e-name" required class="finput"></div>
-          <div><label class="flabel">เพศ</label><select id="e-gender" class="finput" onchange="calcAll('e')"><option>ชาย</option><option>หญิง</option><option>เพศทางเลือก</option></select></div>
+          <div><label class="flabel">เบอร์โทรศัพท์</label><input type="text" id="e-phone" required pattern="0[0-9]{9}" maxlength="10" title="เบอร์โทรศัพท์ 10 หลัก (ขึ้นต้นด้วย 0)" oninput="this.value=this.value.replace(/\D/g,'')" class="finput"></div>
+          <div><label class="flabel">ชื่อ</label><input type="text" id="e-fname" required class="finput"></div>
+          <div><label class="flabel">นามสกุล</label><input type="text" id="e-lname" required class="finput"></div>
+          <div>
+            <label class="flabel">เพศ</label>
+            <select id="e-gender" class="finput" onchange="calcAll('e')" required>
+              <option value="" disabled selected>-- กรุณาเลือกเพศ --</option>
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
           <div><label class="flabel">วันเกิด (พ.ศ.)</label><input type="text" id="e-birth" required class="finput" oninput="fmtDate(this);calcAge('e')"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><label class="flabel">อายุ</label><input type="number" id="e-age" readonly class="finput"></div>
             <div><label class="flabel">หมู่ที่</label><select id="e-moo" class="finput"><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`)</script></select></div>
           </div>
           <div><label class="flabel">บ้านเลขที่</label><input type="text" id="e-addr" class="finput"></div>
-          <div class="col-span-2" style="grid-column:2/-1"><label class="flabel">โรคบิดามารดา</label><select id="e-fhx" class="finput" onchange="calcAll('e')"><option>ไม่มีประวัติ</option><option value="DM">DM</option><option value="HT">HT</option><option value="DM+HT">DM+HT</option></select></div>
+          <div style="grid-column:1/-1"><label class="flabel">โรคบิดามารดา</label><select id="e-fhx" class="finput" onchange="calcAll('e')"><option>ไม่มีประวัติ</option><option value="DM">DM</option><option value="HT">HT</option><option value="DM+HT">DM+HT</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;background:var(--off-white);border-radius:12px;margin-bottom:12px">
           <div><label class="flabel">น้ำหนัก</label><input type="number" step=".1" id="e-wt" class="finput" oninput="calcAll('e')"></div>
@@ -1073,7 +1092,41 @@ async function submitForm(e) {
   document.querySelectorAll('input[name="f-food"]:checked').forEach(c=>foods.push(c.value));
   document.querySelectorAll('input[name="f-sym"]:checked').forEach(c=>syms.push(c.value));
   const cvdLbl=document.getElementById('f-cvd-label').innerText.trim();
-  const payload={action:'add',cid:document.getElementById('f-cid').value,name:document.getElementById('f-name').value,gender:document.getElementById('f-gender').value,birth:document.getElementById('f-birth').value,age:document.getElementById('f-age').value,address:document.getElementById('f-addr').value,moo:document.getElementById('f-moo').value,disease:document.getElementById('f-fhx').value,weight:document.getElementById('f-wt').value||'',height:document.getElementById('f-ht').value||'',bmi:document.getElementById('f-bmi').value||'',waist:document.getElementById('f-waist').value||'',fbs:document.getElementById('f-fbs').value||'',bp:getBP('f'),symptoms:syms.join(','),smoking:document.getElementById('f-smoke').value,alcohol:document.getElementById('f-alc').value,exercise:document.getElementById('f-exer').value,stress:document.getElementById('f-stress').value,sleep:document.getElementById('f-sleep').value,food_habit:foods.join(','),cvd_risk:cvdLbl,visit_date:document.getElementById('f-date').value};
+  
+  const fname = document.getElementById('f-fname').value;
+  const lname = document.getElementById('f-lname').value;
+  const phone = document.getElementById('f-phone').value;
+  const fullName = fname + ' ' + lname;
+
+  const payload={
+    action:'add',
+    cid:document.getElementById('f-cid').value,
+    firstName: fname,
+    lastName: lname,
+    phoneNumber: phone,
+    gender:document.getElementById('f-gender').value,
+    birth:document.getElementById('f-birth').value,
+    age:document.getElementById('f-age').value,
+    address:document.getElementById('f-addr').value,
+    moo:document.getElementById('f-moo').value,
+    disease:document.getElementById('f-fhx').value,
+    weight:document.getElementById('f-wt').value||'',
+    height:document.getElementById('f-ht').value||'',
+    bmi:document.getElementById('f-bmi').value||'',
+    waist:document.getElementById('f-waist').value||'',
+    fbs:document.getElementById('f-fbs').value||'',
+    bp:getBP('f'),
+    symptoms:syms.join(','),
+    smoking:document.getElementById('f-smoke').value,
+    alcohol:document.getElementById('f-alc').value,
+    exercise:document.getElementById('f-exer').value,
+    stress:document.getElementById('f-stress').value,
+    sleep:document.getElementById('f-sleep').value,
+    food_habit:foods.join(','),
+    cvd_risk:cvdLbl,
+    visit_date:document.getElementById('f-date').value
+  };
+
   try {
     const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     const res=await r.json();
@@ -1086,13 +1139,13 @@ async function submitForm(e) {
       document.getElementById('f-cvd-thumb').style.left='0%';
       document.getElementById('f-cvd-label').innerText='รอข้อมูล';
       await loadData();
-      const pr=`วิเคราะห์ผู้ป่วย: ${payload.name} (อายุ ${payload.age}ปี, ${payload.gender})\nโรคครอบครัว: ${payload.disease}\nFBS ${payload.fbs||'-'}, BP ${payload.bp||'-'}, BMI ${payload.bmi||'-'}, รอบเอว ${payload.waist||'-'}\nCVD Risk: ${cvdLbl}\nอาการ: ${syms.join(',')||'ไม่มี'}\nบุหรี่(${payload.smoking}) ดื่ม(${payload.alcohol}) เครียด(${payload.stress})\nสรุปสั้น: 1.ความเสี่ยง 2.คำแนะนำเร่งด่วน 3.ปรับพฤติกรรม`;
+      const pr=`วิเคราะห์ผู้ป่วย: ${fullName} (อายุ ${payload.age}ปี, ${payload.gender})\nโรคครอบครัว: ${payload.disease}\nFBS ${payload.fbs||'-'}, BP ${payload.bp||'-'}, BMI ${payload.bmi||'-'}, รอบเอว ${payload.waist||'-'}\nCVD Risk: ${cvdLbl}\nอาการ: ${syms.join(',')||'ไม่มี'}\nบุหรี่(${payload.smoking}) ดื่ม(${payload.alcohol}) เครียด(${payload.stress})\nสรุปสั้น: 1.ความเสี่ยง 2.คำแนะนำเร่งด่วน 3.ปรับพฤติกรรม`;
       const ai=await fetchAI(pr);
       hideLoad();
       const body=document.getElementById('ai-modal-body');
       if(ai.status==='success'){
         let h=ai.data.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n- /g,'<br>• ').replace(/\n/g,'<br>');
-        body.innerHTML=`<div class="alert-strip s" style="margin-bottom:16px"><i class="fa-solid fa-check-circle" style="font-size:18px;flex-shrink:0"></i><div><strong>บันทึกข้อมูลสำเร็จ!</strong> ข้อมูลของ ${payload.name} ถูกบันทึกแล้ว</div></div><div style="padding:14px 18px;background:var(--blue-light);border-radius:12px;margin-bottom:14px;font-size:12px;font-weight:600;color:var(--blue-deep)"><i class="fa-solid fa-robot mr-2"></i>AI Analysis — ${payload.name}</div><div class="ai-content">${h}</div>`;
+        body.innerHTML=`<div class="alert-strip s" style="margin-bottom:16px"><i class="fa-solid fa-check-circle" style="font-size:18px;flex-shrink:0"></i><div><strong>บันทึกข้อมูลสำเร็จ!</strong> ข้อมูลของ ${fullName} ถูกบันทึกแล้ว</div></div><div style="padding:14px 18px;background:var(--blue-light);border-radius:12px;margin-bottom:14px;font-size:12px;font-weight:600;color:var(--blue-deep)"><i class="fa-solid fa-robot mr-2"></i>AI Analysis — ${fullName}</div><div class="ai-content">${h}</div>`;
       } else {
         body.innerHTML=`<div class="alert-strip s" style="margin-bottom:16px"><i class="fa-solid fa-check-circle" style="font-size:18px;flex-shrink:0"></i><strong>บันทึกสำเร็จ</strong></div><div class="alert-strip w"><i class="fa-solid fa-triangle-exclamation" style="flex-shrink:0"></i>ระบบ AI ไม่พร้อมใช้งานชั่วคราว กรุณาลองใหม่ภายหลัง</div>`;
       }
@@ -1149,7 +1202,11 @@ function renderTbl(){
     list=list.filter(p=>{let f=parseFloat(p.fbs),s=0,d=0;if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);s=s2;d=d2;}return f>=126||s>=140||d>=90;});
     if(moo!=='all') list=list.filter(p=>String(p.moo)===String(moo));
   }
-  if(q) list=list.filter(p=>p.name.toLowerCase().includes(q)||String(p.cid).includes(q));
+  if(q) list=list.filter(p=>{
+    const fn = p.firstName ? `${p.firstName} ${p.lastName||''}`.toLowerCase() : (p.name||'').toLowerCase();
+    return fn.includes(q)||String(p.cid).includes(q)||String(p.phoneNumber||'').includes(q);
+  });
+  
   const tb=document.getElementById('tbl-body');
   if(!list.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted)">ไม่พบข้อมูล</td></tr>';return;}
   tb.innerHTML=list.map(p=>{
@@ -1160,9 +1217,11 @@ function renderTbl(){
     if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);bpCls=s2>=140||d2>=90?'rb-hi':s2>=120||d2>=80?'rb-mid':'rb-lo';bpLbl=s2>=140||d2>=90?'สงสัยสูง':s2>=120||d2>=80?'เฝ้าระวัง':'ปกติ';}
     const cvd=p.cvd_risk||'—';
     const cvdCls=cvd.includes('สูง')?'rb-hi':cvd.includes('กลาง')?'rb-mid':'rb-lo';
+    const fullName = p.firstName ? `${p.firstName} ${p.lastName||''}`.trim() : (p.name || 'ไม่มีชื่อ');
+    
     return `<tr>
       <td style="color:var(--text-muted)">${p.cid}</td>
-      <td><strong>${p.name}</strong> <span style="color:var(--text-muted);font-weight:400">(${p.age})</span></td>
+      <td><strong>${fullName}</strong> <span style="color:var(--text-muted);font-weight:400">(${p.age})</span></td>
       <td style="text-align:center">ม.${p.moo}</td>
       <td style="text-align:center">${p.disease||'—'}</td>
       <td style="text-align:center"><span class="risk-badge ${fbsCls}">${!isNaN(f)?f+' mg/dL':fbsLbl}</span></td>
@@ -1170,7 +1229,7 @@ function renderTbl(){
       <td style="text-align:center"><span class="risk-badge ${cvdCls}">${cvd}</span></td>
       <td style="text-align:center;white-space:nowrap">
         <button class="tbl-action" onclick="openEdit('${p.cid}')" style="color:var(--blue)" title="แก้ไข"><i class="fa-solid fa-pen"></i></button>
-        <button class="tbl-action" onclick="openDel('${p.cid}','${p.name}')" style="color:#ef4444" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+        <button class="tbl-action" onclick="openDel('${p.cid}','${fullName}')" style="color:#ef4444" title="ลบ"><i class="fa-solid fa-trash"></i></button>
         <button class="tbl-action" onclick="aiPx('${p.cid}')" style="color:#8b5cf6" title="AI วิเคราะห์"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
         <button class="tbl-action" onclick="pdfPx('${p.cid}')" style="color:#f59e0b" title="PDF"><i class="fa-solid fa-file-pdf"></i></button>
       </td>
@@ -1183,7 +1242,23 @@ function renderTbl(){
 function openEdit(cid){
   const p=allPx.find(x=>String(x.cid)===String(cid)); if(!p) return;
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};
-  set('e-cid',p.cid);set('e-name',p.name);set('e-gender',p.gender||'ชาย');set('e-birth',p.birth);set('e-age',p.age);
+  
+  // Backward compatibility for old "name" field
+  let fName = p.firstName || '';
+  let lName = p.lastName || '';
+  if (!fName && !lName && p.name) {
+      let pts = p.name.split(' ');
+      fName = pts[0];
+      lName = pts.slice(1).join(' ');
+  }
+  
+  set('e-cid',p.cid);
+  set('e-fname',fName);
+  set('e-lname',lName);
+  set('e-phone',p.phoneNumber||'');
+  set('e-gender',p.gender||'');
+  set('e-birth',p.birth);
+  set('e-age',p.age);
   set('e-moo',p.moo);set('e-addr',p.address);set('e-fhx',p.disease);set('e-wt',p.weight);set('e-ht',p.height);
   set('e-bmi',p.bmi);set('e-waist',p.waist||'');set('e-fbs',p.fbs);set('e-smoke',p.smoking||'ไม่สูบ');
   set('e-alc',p.alcohol);set('e-exer',p.exercise);set('e-stress',p.stress||'น้อย');set('e-sleep',p.sleep);
@@ -1197,7 +1272,38 @@ function openEdit(cid){
 async function submitEdit(e){
   e.preventDefault(); showLoad("กำลังอัปเดต...");
   const syms=[]; document.querySelectorAll('input[name="e-sym"]:checked').forEach(c=>syms.push(c.value));
-  const payload={action:'edit',cid:document.getElementById('e-cid').value,name:document.getElementById('e-name').value,gender:document.getElementById('e-gender').value,birth:document.getElementById('e-birth').value,age:document.getElementById('e-age').value,address:document.getElementById('e-addr').value,moo:document.getElementById('e-moo').value,disease:document.getElementById('e-fhx').value,weight:document.getElementById('e-wt').value||'',height:document.getElementById('e-ht').value||'',bmi:document.getElementById('e-bmi').value||'',waist:document.getElementById('e-waist').value||'',fbs:document.getElementById('e-fbs').value||'',bp:getBP('e'),symptoms:syms.join(','),smoking:document.getElementById('e-smoke').value,alcohol:document.getElementById('e-alc').value,exercise:document.getElementById('e-exer').value,stress:document.getElementById('e-stress').value,sleep:document.getElementById('e-sleep').value,cvd_risk:'',visit_date:document.getElementById('e-date').value};
+  const fname = document.getElementById('e-fname').value;
+  const lname = document.getElementById('e-lname').value;
+  const phone = document.getElementById('e-phone').value;
+  
+  const payload={
+    action:'edit',
+    cid:document.getElementById('e-cid').value,
+    firstName: fname,
+    lastName: lname,
+    phoneNumber: phone,
+    gender:document.getElementById('e-gender').value,
+    birth:document.getElementById('e-birth').value,
+    age:document.getElementById('e-age').value,
+    address:document.getElementById('e-addr').value,
+    moo:document.getElementById('e-moo').value,
+    disease:document.getElementById('e-fhx').value,
+    weight:document.getElementById('e-wt').value||'',
+    height:document.getElementById('e-ht').value||'',
+    bmi:document.getElementById('e-bmi').value||'',
+    waist:document.getElementById('e-waist').value||'',
+    fbs:document.getElementById('e-fbs').value||'',
+    bp:getBP('e'),
+    symptoms:syms.join(','),
+    smoking:document.getElementById('e-smoke').value,
+    alcohol:document.getElementById('e-alc').value,
+    exercise:document.getElementById('e-exer').value,
+    stress:document.getElementById('e-stress').value,
+    sleep:document.getElementById('e-sleep').value,
+    cvd_risk:'',
+    visit_date:document.getElementById('e-date').value
+  };
+  
   try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload)});const res=await r.json();hideLoad();
     if(res.status==='success'){document.getElementById('edit-modal').style.display='none';await loadData();showAlert('แก้ไขข้อมูลสำเร็จ!','success');}
     else showAlert(res.message,'error');
@@ -1221,21 +1327,23 @@ async function fetchAI(prompt){
 }
 async function aiPx(cid){
   const p=allPx.find(x=>String(x.cid)===String(cid)); if(!p) return;
+  const fullName = p.firstName ? `${p.firstName} ${p.lastName||''}`.trim() : (p.name || 'ไม่มีชื่อ');
   const mb=document.getElementById('ai-modal-body');
   document.getElementById('ai-modal').style.display='flex';
-  mb.innerHTML=`<div style="text-align:center;padding:40px"><div class="loader-ring" style="margin:0 auto 14px"></div><p style="color:#8b5cf6;font-weight:600">กำลังวิเคราะห์ข้อมูลคุณ ${p.name}...</p></div>`;
-  const pr=`วิเคราะห์เจาะลึก: ${p.name} (${p.age}ปี,${p.gender})\nโรคครอบครัว:${p.disease}\nFBS:${p.fbs||'-'} BP:${p.bp||'-'} BMI:${p.bmi||'-'} รอบเอว:${p.waist||'-'}\nCVD:${p.cvd_risk||'-'} บุหรี่:${p.smoking||'-'} เครียด:${p.stress||'-'}\nอาการ:${p.symptoms||'ไม่มี'}\nสรุป 4 ข้อ: 1.สถานะสุขภาพ 2.คำแนะนำ 3.ระวังพิเศษ 4.เป้าหมาย 6 เดือน`;
+  mb.innerHTML=`<div style="text-align:center;padding:40px"><div class="loader-ring" style="margin:0 auto 14px"></div><p style="color:#8b5cf6;font-weight:600">กำลังวิเคราะห์ข้อมูลคุณ ${fullName}...</p></div>`;
+  const pr=`วิเคราะห์เจาะลึก: ${fullName} (${p.age}ปี,${p.gender})\nโรคครอบครัว:${p.disease}\nFBS:${p.fbs||'-'} BP:${p.bp||'-'} BMI:${p.bmi||'-'} รอบเอว:${p.waist||'-'}\nCVD:${p.cvd_risk||'-'} บุหรี่:${p.smoking||'-'} เครียด:${p.stress||'-'}\nอาการ:${p.symptoms||'ไม่มี'}\nสรุป 4 ข้อ: 1.สถานะสุขภาพ 2.คำแนะนำ 3.ระวังพิเศษ 4.เป้าหมาย 6 เดือน`;
   const ai=await fetchAI(pr);
-  if(ai.status==='success'){let h=ai.data.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n- /g,'<br>• ').replace(/\n/g,'<br>');mb.innerHTML=`<div style="padding:12px 16px;background:var(--blue-light);border-radius:10px;margin-bottom:14px;font-size:12px;font-weight:700;color:var(--blue-deep)"><i class="fa-solid fa-user-doctor mr-2"></i>ผลวิเคราะห์: ${p.name}</div><div class="ai-content">${h}</div>`;}
+  if(ai.status==='success'){let h=ai.data.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n- /g,'<br>• ').replace(/\n/g,'<br>');mb.innerHTML=`<div style="padding:12px 16px;background:var(--blue-light);border-radius:10px;margin-bottom:14px;font-size:12px;font-weight:700;color:var(--blue-deep)"><i class="fa-solid fa-user-doctor mr-2"></i>ผลวิเคราะห์: ${fullName}</div><div class="ai-content">${h}</div>`;}
   else mb.innerHTML=`<div class="alert-strip e">${ai.message}</div>`;
 }
 async function pdfPx(cid){
   const p=allPx.find(x=>String(x.cid)===String(cid)); if(!p) return;
+  const fullName = p.firstName ? `${p.firstName} ${p.lastName||''}`.trim() : (p.name || 'ไม่มีชื่อ');
   const w=window.open('','_blank'); w.document.write('<html><head><title>กำลังสร้าง AI Report...</title></head><body style="text-align:center;padding:60px;font-family:Tahoma,sans-serif;color:#8b5cf6"><h2>🤖 กำลังสร้างรายงาน AI...</h2></body></html>');
-  const pr=`สร้างรายงานสุขภาพ: ${p.name} (${p.age}ปี) CID:${p.cid}\nค่าสุขภาพ: FBS${p.fbs||'-'}, BP${p.bp||'-'}, รอบเอว${p.waist||'-'}, CVD:${p.cvd_risk||'-'}\nอาการ: ${p.symptoms||'ไม่มี'}\nสรุป: 1.ความเสี่ยง 2.การติดตาม 3.คำแนะนำเฉพาะ`;
+  const pr=`สร้างรายงานสุขภาพ: ${fullName} (${p.age}ปี) CID:${p.cid}\nค่าสุขภาพ: FBS${p.fbs||'-'}, BP${p.bp||'-'}, รอบเอว${p.waist||'-'}, CVD:${p.cvd_risk||'-'}\nอาการ: ${p.symptoms||'ไม่มี'}\nสรุป: 1.ความเสี่ยง 2.การติดตาม 3.คำแนะนำเฉพาะ`;
   const ai=await fetchAI(pr);
   if(ai.status==='success'){let h=ai.data.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n- /g,'<br>• ').replace(/\n/g,'<br>');
-    w.document.open();w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');body{font-family:Sarabun,sans-serif;padding:36px;max-width:700px;margin:0 auto;line-height:1.7;color:#1a1a2e}.header{border-bottom:3px solid #8b5cf6;padding-bottom:16px;margin-bottom:20px}.badge{display:inline-block;background:#eff6ff;color:#1e40af;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px}h1{font-size:20px;font-weight:700;color:#0d47a1}.info-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px}.ai-box{border-left:4px solid #8b5cf6;padding-left:16px;font-size:13.5px}.btn{display:block;width:180px;margin:28px auto;background:#8b5cf6;color:#fff;padding:11px;text-align:center;border-radius:8px;cursor:pointer;border:none;font-size:14px;font-weight:700;font-family:inherit}@media print{.btn{display:none}}</style></head><body><div class="header"><div class="badge">รพ.สต.บึงเนียม · BN Smart Health</div><h1>รายงานประเมินสุขภาพ (AI-Assisted)</h1><p style="color:#64748b;font-size:12px">วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH')}</p></div><div class="info-box"><strong>ชื่อ:</strong> ${p.name} (อายุ ${p.age} ปี, เพศ ${p.gender})<br><strong>เลขบัตร:</strong> ${p.cid}<br><strong>ที่อยู่:</strong> บ้านเลขที่ ${p.address||'-'} หมู่ ${p.moo}<br><strong>ค่าตรวจ:</strong> FBS ${p.fbs||'-'} mg/dL, BP ${p.bp||'-'} mmHg, BMI ${p.bmi||'-'}, รอบเอว ${p.waist||'-'} ซม.</div><div class="ai-box"><p>${h}</p></div><button class="btn" onclick="window.print()">🖨️ พิมพ์รายงาน</button><script>setTimeout(()=>window.print(),900)<\/script></body></html>`);w.document.close();
+    w.document.open();w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');body{font-family:Sarabun,sans-serif;padding:36px;max-width:700px;margin:0 auto;line-height:1.7;color:#1a1a2e}.header{border-bottom:3px solid #8b5cf6;padding-bottom:16px;margin-bottom:20px}.badge{display:inline-block;background:#eff6ff;color:#1e40af;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px}h1{font-size:20px;font-weight:700;color:#0d47a1}.info-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px}.ai-box{border-left:4px solid #8b5cf6;padding-left:16px;font-size:13.5px}.btn{display:block;width:180px;margin:28px auto;background:#8b5cf6;color:#fff;padding:11px;text-align:center;border-radius:8px;cursor:pointer;border:none;font-size:14px;font-weight:700;font-family:inherit}@media print{.btn{display:none}}</style></head><body><div class="header"><div class="badge">รพ.สต.บึงเนียม · BN Smart Health</div><h1>รายงานประเมินสุขภาพ (AI-Assisted)</h1><p style="color:#64748b;font-size:12px">วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH')}</p></div><div class="info-box"><strong>ชื่อ:</strong> ${fullName} (อายุ ${p.age} ปี, เพศ ${p.gender})<br><strong>เลขบัตร:</strong> ${p.cid}<br><strong>โทรศัพท์:</strong> ${p.phoneNumber||'-'}<br><strong>ที่อยู่:</strong> บ้านเลขที่ ${p.address||'-'} หมู่ ${p.moo}<br><strong>ค่าตรวจ:</strong> FBS ${p.fbs||'-'} mg/dL, BP ${p.bp||'-'} mmHg, BMI ${p.bmi||'-'}, รอบเอว ${p.waist||'-'} ซม.</div><div class="ai-box"><p>${h}</p></div><button class="btn" onclick="window.print()">🖨️ พิมพ์รายงาน</button><script>setTimeout(()=>window.print(),900)<\/script></body></html>`);w.document.close();
   } else { w.close(); showAlert('AI ล้มเหลว: '+ai.message,'error'); }
 }
 
@@ -1271,8 +1379,12 @@ function exportExcel(mode){
   let data=allPx;
   if(mode==='hi') data=data.filter(p=>{let f=parseFloat(p.fbs),s=0,d=0;if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);s=s2;d=d2;}return f>=126||s>=140||d>=90;});
   if(!data.length){showAlert('ไม่มีข้อมูล','warning');return;}
-  let csv="CID,ชื่อ-สกุล,เพศ,อายุ,โรคครอบครัว,หมู่,บ้านเลขที่,น้ำหนัก,ส่วนสูง,BMI,รอบเอว,FBS,ความดัน,บุหรี่,แอลกอฮอล์,ความเครียด,อาหาร,CVD Risk\n";
-  data.forEach(p=>csv+=`${p.cid},"${p.name}",${p.gender||''},${p.age},"${p.disease}",${p.moo},"${p.address||''}",${p.weight||''},${p.height||''},${p.bmi||''},${p.waist||''},${p.fbs||''},${p.bp||''},"${p.smoking||''}","${p.alcohol||''}","${p.stress||''}","${p.food_habit||''}","${p.cvd_risk||''}"\n`);
+  let csv="CID,ชื่อ,นามสกุล,เบอร์โทร,เพศ,อายุ,โรคครอบครัว,หมู่,บ้านเลขที่,น้ำหนัก,ส่วนสูง,BMI,รอบเอว,FBS,ความดัน,บุหรี่,แอลกอฮอล์,ความเครียด,อาหาร,CVD Risk\n";
+  data.forEach(p=>{
+    let fn = p.firstName || ''; let ln = p.lastName || '';
+    if(!fn && !ln && p.name) { let pts = p.name.split(' '); fn = pts[0]||''; ln = pts.slice(1).join(' ')||''; }
+    csv+=`${p.cid},"${fn}","${ln}","${p.phoneNumber||''}",${p.gender||''},${p.age},"${p.disease}",${p.moo},"${p.address||''}",${p.weight||''},${p.height||''},${p.bmi||''},${p.waist||''},${p.fbs||''},${p.bp||''},"${p.smoking||''}","${p.alcohol||''}","${p.stress||''}","${p.food_habit||''}","${p.cvd_risk||''}"\n`;
+  });
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`BNHealth_${mode==='hi'?'HighRisk':'All'}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }
