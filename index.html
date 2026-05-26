@@ -391,9 +391,10 @@ select.finput{cursor:pointer}
                 <input class="finput" type="number" id="f-age" readonly placeholder="คำนวณอัตโนมัติ" onchange="calcAll('f')">
               </div>
               <div>
-                <label class="flabel" for="f-moo">หมู่ที่</label>
-                <select id="f-moo" class="finput">
-                  <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`)</script>
+                <label class="flabel" for="f-moo">หมู่ที่ *</label>
+                <select id="f-moo" class="finput" required>
+                  <option value="" disabled selected>-- กรุณาเลือกหมู่บ้าน --</option>
+                  <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">ม.${i}</option>`)</script>
                 </select>
               </div>
               <div>
@@ -806,7 +807,7 @@ select.finput{cursor:pointer}
           <div><label class="flabel">วันเกิด (พ.ศ.)</label><input type="text" id="e-birth" required class="finput" oninput="fmtDate(this);calcAge('e')"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><label class="flabel">อายุ</label><input type="number" id="e-age" readonly class="finput"></div>
-            <div><label class="flabel">หมู่ที่</label><select id="e-moo" class="finput"><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">หมู่ ${i}</option>`)</script></select></div>
+            <div><label class="flabel">หมู่ที่ *</label><select id="e-moo" class="finput" required><option value="" disabled selected>-- กรุณาเลือกหมู่บ้าน --</option><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">ม.${i}</option>`)</script></select></div>
           </div>
           <div><label class="flabel">บ้านเลขที่</label><input type="text" id="e-addr" class="finput"></div>
           <div style="grid-column:1/-1"><label class="flabel">โรคบิดามารดา</label><select id="e-fhx" class="finput" onchange="calcAll('e')"><option>ไม่มีประวัติ</option><option value="DM">DM</option><option value="HT">HT</option><option value="DM+HT">DM+HT</option></select></div>
