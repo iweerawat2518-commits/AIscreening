@@ -404,6 +404,43 @@ select.finput{cursor:pointer}
                 <label class="flabel" for="f-addr">บ้านเลขที่</label>
                 <input class="finput" type="text" id="f-addr" placeholder="บ้านเลขที่">
               </div>
+
+              <!-- เพิ่มส่วนของ โรคประจำตัว (Dropdown + Multi Select) -->
+              <div style="grid-column:1/-1;position:relative" id="f-ud-container">
+                <label class="flabel">โรคประจำตัว <span style="font-size:10px;color:var(--text-muted);font-weight:400">(เลือกได้หลายรายการ)</span></label>
+                <div class="finput" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:var(--white);user-select:none" onclick="toggleDropdown('f-ud-menu')">
+                  <span id="f-ud-display" style="color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">เลือกโรคประจำตัว</span>
+                  <i class="fa-solid fa-chevron-down" style="color:var(--text-muted)"></i>
+                </div>
+                
+                <div id="f-ud-menu" class="hidden" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1.5px solid var(--mint);border-radius:12px;padding:16px;z-index:999;box-shadow:var(--shadow-lg);max-height:340px;overflow-y:auto;animation:viewIn 0.2s ease">
+                  <div class="chip-grid" style="grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px">
+                    <label class="chip"><input type="checkbox" name="f-ud" value="ไม่มีโรคประจำตัว" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ไม่มีโรคประจำตัว</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="เบาหวาน" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">เบาหวาน</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="ความดันโลหิตสูง" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ความดันโลหิตสูง</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="โรคหัวใจ" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคหัวใจ</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="โรคไต" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคไต</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="โรคหลอดเลือดสมอง" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคหลอดเลือดสมอง</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="หอบหืด" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">หอบหืด</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="ภูมิแพ้" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ภูมิแพ้</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="ไขมันในเลือดสูง" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ไขมันในเลือดสูง</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="มะเร็ง" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">มะเร็ง</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="วัณโรค" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">วัณโรค</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="HIV" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">HIV</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="โรคตับ" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคตับ</div></div></label>
+                    <label class="chip"><input type="checkbox" name="f-ud" value="อื่น ๆ" onchange="handleUDChange('f', this)" style="accent-color:var(--mint)"><div><div class="chip-text">อื่น ๆ</div></div></label>
+                  </div>
+                  <div id="f-ud-other-wrap" class="hidden" style="margin-top:12px;animation:viewIn 0.3s ease">
+                    <input type="text" id="f-ud-other" class="finput" placeholder="โปรดระบุโรคประจำตัวอื่น ๆ..." oninput="updateUDDisplay('f')">
+                  </div>
+                  <div style="margin-top:16px;text-align:right">
+                    <button type="button" onclick="toggleDropdown('f-ud-menu')" style="padding:8px 24px;background:linear-gradient(135deg,var(--mint),var(--sky));color:#fff;font-weight:700;border-radius:10px;border:none;font-size:12.5px;cursor:pointer;box-shadow:0 4px 14px rgba(0,201,167,.4)"><i class="fa-solid fa-check mr-1"></i> ตกลง</button>
+                  </div>
+                </div>
+                <div style="font-size:10.5px;color:var(--text-muted);margin-top:5px"><i class="fa-solid fa-circle-info mr-1"></i>กรุณาเลือกโรคประจำตัวของผู้รับการคัดกรอง</div>
+              </div>
+              <!-- สิ้นสุดส่วนของ โรคประจำตัว -->
+
               <div style="grid-column:1/-1">
                 <label class="flabel" for="f-fhx">ประวัติโรคบิดามารดา</label>
                 <select id="f-fhx" class="finput" onchange="calcAll('f')">
@@ -812,6 +849,42 @@ select.finput{cursor:pointer}
             <div><label class="flabel">หมู่ที่ *</label><select id="e-moo" class="finput" required><option value="" disabled selected>-- กรุณาเลือกหมู่บ้าน --</option><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">ม.${i}</option>`)</script></select></div>
           </div>
           <div><label class="flabel">บ้านเลขที่</label><input type="text" id="e-addr" class="finput"></div>
+          
+          <!-- เพิ่มส่วนของ โรคประจำตัว ใน Modal แก้ไข -->
+          <div style="grid-column:1/-1;position:relative" id="e-ud-container">
+            <label class="flabel">โรคประจำตัว <span style="font-size:10px;color:var(--text-muted);font-weight:400">(เลือกได้หลายรายการ)</span></label>
+            <div class="finput" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:var(--white);user-select:none" onclick="toggleDropdown('e-ud-menu')">
+              <span id="e-ud-display" style="color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">เลือกโรคประจำตัว</span>
+              <i class="fa-solid fa-chevron-down" style="color:var(--text-muted)"></i>
+            </div>
+            
+            <div id="e-ud-menu" class="hidden" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1.5px solid var(--mint);border-radius:12px;padding:16px;z-index:999;box-shadow:var(--shadow-lg);max-height:300px;overflow-y:auto;">
+              <div class="chip-grid" style="grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px">
+                <label class="chip"><input type="checkbox" name="e-ud" value="ไม่มีโรคประจำตัว" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ไม่มีโรคประจำตัว</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="เบาหวาน" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">เบาหวาน</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="ความดันโลหิตสูง" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ความดันโลหิตสูง</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="โรคหัวใจ" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคหัวใจ</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="โรคไต" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคไต</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="โรคหลอดเลือดสมอง" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคหลอดเลือดสมอง</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="หอบหืด" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">หอบหืด</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="ภูมิแพ้" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ภูมิแพ้</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="ไขมันในเลือดสูง" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">ไขมันในเลือดสูง</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="มะเร็ง" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">มะเร็ง</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="วัณโรค" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">วัณโรค</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="HIV" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">HIV</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="โรคตับ" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">โรคตับ</div></div></label>
+                <label class="chip"><input type="checkbox" name="e-ud" value="อื่น ๆ" onchange="handleUDChange('e', this)" style="accent-color:var(--mint)"><div><div class="chip-text">อื่น ๆ</div></div></label>
+              </div>
+              <div id="e-ud-other-wrap" class="hidden" style="margin-top:12px;">
+                <input type="text" id="e-ud-other" class="finput" placeholder="โปรดระบุโรคประจำตัวอื่น ๆ..." oninput="updateUDDisplay('e')">
+              </div>
+              <div style="margin-top:16px;text-align:right">
+                <button type="button" onclick="toggleDropdown('e-ud-menu')" style="padding:8px 24px;background:linear-gradient(135deg,var(--mint),var(--sky));color:#fff;font-weight:700;border-radius:10px;border:none;font-size:12.5px;cursor:pointer;box-shadow:0 4px 14px rgba(0,201,167,.4)"><i class="fa-solid fa-check mr-1"></i> ตกลง</button>
+              </div>
+            </div>
+          </div>
+          <!-- สิ้นสุดส่วนของ โรคประจำตัว -->
+
           <div style="grid-column:1/-1"><label class="flabel">โรคบิดามารดา</label><select id="e-fhx" class="finput" onchange="calcAll('e')"><option>ไม่มีประวัติ</option><option value="DM">DM</option><option value="HT">HT</option><option value="DM+HT">DM+HT</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;background:var(--off-white);border-radius:12px;margin-bottom:12px">
@@ -827,6 +900,14 @@ select.finput{cursor:pointer}
           <div><label class="flabel">แอลกอฮอล์</label><select id="e-alc" class="finput"><option>ไม่ดื่ม</option><option>ดื่มนานๆครั้ง</option><option>ดื่มเป็นประจำ</option></select></div>
           <div><label class="flabel">ออกกำลังกาย</label><select id="e-exer" class="finput"><option>ไม่ได้ออก</option><option>1-2 วัน/สัปดาห์</option><option>3 วัน+/สัปดาห์</option></select></div>
           <div><label class="flabel">ความเครียด</label><select id="e-stress" class="finput"><option>น้อย</option><option>ปานกลาง</option><option>มาก</option></select></div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label class="flabel">การนอนหลับ</label>
+          <select id="e-sleep" class="finput" style="max-width:220px">
+            <option value="น้อยกว่า 6 ชม.">😴 น้อยกว่า 6 ชม.</option>
+            <option value="6-8 ชม." selected>✅ 6-8 ชม.</option>
+            <option value="มากกว่า 8 ชม.">💤 มากกว่า 8 ชม.</option>
+          </select>
         </div>
         <div style="margin-bottom:12px">
           <div style="padding:12px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:10px">
@@ -940,7 +1021,134 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('f-date').valueAsDate = new Date();
   document.getElementById('page-title').innerText = 'บันทึกคัดกรองสุขภาพ';
   loadData();
+
+  // ซ่อน Dropdown โรคประจำตัว เมื่อคลิกพื้นที่อื่นบนหน้าจอ
+  document.addEventListener('click', function(e) {
+    ['f', 'e'].forEach(prefix => {
+      const container = document.getElementById(`${prefix}-ud-container`);
+      const menu = document.getElementById(`${prefix}-ud-menu`);
+      if (container && menu && !container.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+  });
 });
+
+// ───────────────────────────────────────────────
+// UNDERLYING DISEASE (โรคประจำตัว) LOGIC
+// ───────────────────────────────────────────────
+function toggleDropdown(id) {
+  const menu = document.getElementById(id);
+  menu.classList.toggle('hidden');
+}
+
+function handleUDChange(prefix, checkbox) {
+  const checkboxes = document.querySelectorAll(`input[name="${prefix}-ud"]`);
+  const otherWrap = document.getElementById(`${prefix}-ud-other-wrap`);
+  const otherInput = document.getElementById(`${prefix}-ud-other`);
+
+  // ถ้าเลือก "ไม่มีโรคประจำตัว" ให้ยกเลิกการเลือกข้ออื่นทั้งหมด
+  if (checkbox.value === 'ไม่มีโรคประจำตัว' && checkbox.checked) {
+    checkboxes.forEach(cb => { if (cb !== checkbox) cb.checked = false; });
+    otherWrap.classList.add('hidden');
+    otherInput.value = '';
+  } else if (checkbox.checked) {
+    // ถ้าเลือกข้ออื่น ให้เอาติ๊ก "ไม่มีโรคประจำตัว" ออก
+    document.querySelector(`input[name="${prefix}-ud"][value="ไม่มีโรคประจำตัว"]`).checked = false;
+  }
+
+  // จัดการการแสดงผลช่อง "อื่น ๆ"
+  if (checkbox.value === 'อื่น ๆ') {
+    if (checkbox.checked) {
+      otherWrap.classList.remove('hidden');
+      otherInput.focus();
+    } else {
+      otherWrap.classList.add('hidden');
+      otherInput.value = '';
+    }
+  }
+
+  updateUDDisplay(prefix);
+}
+
+function updateUDDisplay(prefix) {
+  const checkboxes = document.querySelectorAll(`input[name="${prefix}-ud"]:checked`);
+  const display = document.getElementById(`${prefix}-ud-display`);
+  const otherInput = document.getElementById(`${prefix}-ud-other`);
+  
+  if (checkboxes.length === 0) {
+    display.innerText = 'เลือกโรคประจำตัว';
+    display.style.color = 'var(--text-muted)';
+    return;
+  }
+
+  let selected = [];
+  checkboxes.forEach(cb => {
+    if (cb.value === 'อื่น ๆ' && otherInput.value.trim() !== '') {
+      selected.push(otherInput.value.trim());
+    } else if (cb.value !== 'อื่น ๆ') {
+      selected.push(cb.value);
+    } else {
+      selected.push('อื่น ๆ'); // กรณีติ๊กแล้วแต่ยังไม่ได้พิมพ์
+    }
+  });
+
+  display.innerText = selected.join(', ');
+  display.style.color = 'var(--text)';
+}
+
+function getUDValue(prefix) {
+  const checkboxes = document.querySelectorAll(`input[name="${prefix}-ud"]:checked`);
+  const otherInput = document.getElementById(`${prefix}-ud-other`);
+  let selected = [];
+  checkboxes.forEach(cb => {
+    if (cb.value === 'อื่น ๆ') {
+      if (otherInput.value.trim() !== '') selected.push(otherInput.value.trim());
+    } else {
+      selected.push(cb.value);
+    }
+  });
+  return selected.join(', ');
+}
+
+function setUDValue(prefix, valStr) {
+  const checkboxes = document.querySelectorAll(`input[name="${prefix}-ud"]`);
+  const otherWrap = document.getElementById(`${prefix}-ud-other-wrap`);
+  const otherInput = document.getElementById(`${prefix}-ud-other`);
+  
+  // รีเซ็ตค่าเริ่มต้นก่อน
+  checkboxes.forEach(cb => cb.checked = false);
+  otherWrap.classList.add('hidden');
+  otherInput.value = '';
+
+  if (!valStr) {
+    updateUDDisplay(prefix);
+    return;
+  }
+
+  const vals = valStr.split(',').map(v => v.trim());
+  let hasOther = false;
+  let otherVals = [];
+
+  vals.forEach(v => {
+    let cb = document.querySelector(`input[name="${prefix}-ud"][value="${v}"]`);
+    if (cb) {
+      cb.checked = true;
+    } else {
+      hasOther = true;
+      otherVals.push(v);
+    }
+  });
+
+  if (hasOther) {
+    const otherCb = document.querySelector(`input[name="${prefix}-ud"][value="อื่น ๆ"]`);
+    if (otherCb) otherCb.checked = true;
+    otherWrap.classList.remove('hidden');
+    otherInput.value = otherVals.join(', ');
+  }
+
+  updateUDDisplay(prefix);
+}
 
 // ───────────────────────────────────────────────
 // THEME
@@ -1184,6 +1392,7 @@ async function submitForm(e) {
     sleep:document.getElementById('f-sleep').value,
     food_habit:foods.join(','),
     cvd_risk:cvdLbl,
+    underlying_disease:getUDValue('f'),
     visit_date:document.getElementById('f-date').value
   };
 
@@ -1196,6 +1405,7 @@ async function submitForm(e) {
       sendLineAlert(payload);
       
       document.getElementById('patient-form').reset();
+      updateUDDisplay('f'); // รีเซ็ตการแสดงผล Dropdown โรคประจำตัว
       document.getElementById('f-date').valueAsDate=new Date();
       document.getElementById('f-waist-badge').innerHTML='';
       document.getElementById('f-symp-alert').classList.remove('show');
@@ -1330,6 +1540,7 @@ function openEdit(cid){
   if(p.visit_date){let d=new Date(p.visit_date);if(!isNaN(d))document.getElementById('e-date').valueAsDate=d;}
   document.querySelectorAll('input[name="e-sym"]').forEach(c=>c.checked=false);
   if(p.symptoms) p.symptoms.split(',').forEach(v=>{let c=document.querySelector(`input[name="e-sym"][value="${v.trim()}"]`);if(c)c.checked=true;});
+  setUDValue('e', p.underlying_disease); // เซ็ตค่าเริ่มต้นให้ Dropdown โรคประจำตัวในฟอร์มแก้ไข
   calcAll('e'); chkSym('e');
   document.getElementById('edit-modal').style.display='flex';
 }
@@ -1363,8 +1574,9 @@ async function submitEdit(e){
     alcohol:document.getElementById('e-alc').value,
     exercise:document.getElementById('e-exer').value,
     stress:document.getElementById('e-stress').value,
-    sleep:document.getElementById('e-sleep').value,
+    sleep:document.getElementById('e-sleep')?.value || '',
     cvd_risk:'',
+    underlying_disease:getUDValue('e'),
     visit_date:document.getElementById('e-date').value
   };
   
@@ -1491,11 +1703,11 @@ function exportExcel(mode){
   let data=allPx;
   if(mode==='hi') data=data.filter(p=>{let f=parseFloat(p.fbs),s=0,d=0;if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);s=s2;d=d2;}return f>=126||s>=140||d>=90;});
   if(!data.length){showAlert('ไม่มีข้อมูล','warning');return;}
-  let csv="CID,ชื่อ,นามสกุล,เบอร์โทร,เพศ,อายุ,โรคครอบครัว,หมู่,บ้านเลขที่,น้ำหนัก,ส่วนสูง,BMI,รอบเอว,FBS,ความดัน,บุหรี่,แอลกอฮอล์,ความเครียด,อาหาร,CVD Risk\n";
+  let csv="CID,ชื่อ,นามสกุล,เบอร์โทร,เพศ,อายุ,โรคประจำตัว,โรคครอบครัว,หมู่,บ้านเลขที่,น้ำหนัก,ส่วนสูง,BMI,รอบเอว,FBS,ความดัน,บุหรี่,แอลกอฮอล์,ความเครียด,อาหาร,CVD Risk\n";
   data.forEach(p=>{
     let fn = p.firstName || ''; let ln = p.lastName || '';
     if(!fn && !ln && p.name) { let pts = p.name.split(' '); fn = pts[0]||''; ln = pts.slice(1).join(' ')||''; }
-    csv+=`${p.cid},"${fn}","${ln}","${p.phoneNumber||''}",${p.gender||''},${p.age},"${p.disease}",${p.moo},"${p.address||''}",${p.weight||''},${p.height||''},${p.bmi||''},${p.waist||''},${p.fbs||''},${p.bp||''},"${p.smoking||''}","${p.alcohol||''}","${p.stress||''}","${p.food_habit||''}","${p.cvd_risk||''}"\n`;
+    csv+=`${p.cid},"${fn}","${ln}","${p.phoneNumber||''}",${p.gender||''},${p.age},"${p.underlying_disease||''}","${p.disease||''}",${p.moo},"${p.address||''}",${p.weight||''},${p.height||''},${p.bmi||''},${p.waist||''},${p.fbs||''},${p.bp||''},"${p.smoking||''}","${p.alcohol||''}","${p.stress||''}","${p.food_habit||''}","${p.cvd_risk||''}"\n`;
   });
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`BNHealth_${mode==='hi'?'HighRisk':'All'}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
