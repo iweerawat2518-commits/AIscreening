@@ -962,13 +962,7 @@ window._stats = null;
 // ───────────────────────────────────────────────
 async function sendLineAlert(p) {
   const tk = "05T2O0MfUzCmxfu0APNijbffEOsjeXvhmgz9GimRignuTEsqYbYd4lejkknPNm1OIpg+pCkRDUoCm26hj//dWeWrPtmmrg2UC+xUlv1HMHCxcjebqcqHiq45xnmyRfW1H0IV3jd6S0P7EjHpira5RwdB04t89/1O/w1cDnyilFU=";
-  
-  // 📌 สามารถเพิ่ม UID ของคนอื่นๆ หรือ Group ID เข้าไปใน Array นี้ได้เลย (คั่นด้วยลูกน้ำ)
-  const targetIds = [
-    "U1371d5e9069bed92b46a0218c38d46bd", // คนที่ 1 (แอดมินหลัก)
-    // "Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // คนที่ 2 (เอา // ออกแล้วใส่ UID ของคนอื่น)
-    // "Cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  // หรือใส่ Group ID เพื่อส่งเข้ากลุ่ม LINE
-  ];
+  const uid = "U1371d5e9069bed92b46a0218c38d46bd";
   
   let alerts = [];
   let f = parseFloat(p.fbs);
@@ -984,44 +978,34 @@ async function sendLineAlert(p) {
   const msg = `🚨 แจ้งเตือนเคสเสี่ยงสูงด่วน!\n\nชื่อ: ${p.firstName} ${p.lastName} (อายุ ${p.age} ปี)\nหมู่ที่: ม.${p.moo}\nเบอร์โทร: ${p.phoneNumber || '-'}\n\n⚠️ ค่าผิดปกติที่พบ:\n- ${alerts.join('\n- ')}\n\nโปรดตรวจสอบและติดตามอาการโดยด่วน!`;
   
   try {
-    // วนลูปส่งข้อความหาทุกคนใน targetIds
-    for (const tid of targetIds) {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'relay_line', token: tk, uid: tid, message: msg })
-      });
-    }
+    // ส่งผ่าน Google Apps Script เพื่อเลี่ยงการถูกบล็อก CORS จากเบราว์เซอร์
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'relay_line', token: tk, uid: uid, message: msg })
+    });
   } catch (e) { console.error('LINE Alert Error:', e); }
 }
 
 async function testLineAlert() {
   const tk = "05T2O0MfUzCmxfu0APNijbffEOsjeXvhmgz9GimRignuTEsqYbYd4lejkknPNm1OIpg+pCkRDUoCm26hj//dWeWrPtmmrg2UC+xUlv1HMHCxcjebqcqHiq45xnmyRfW1H0IV3jd6S0P7EjHpira5RwdB04t89/1O/w1cDnyilFU=";
-  
-  // 📌 ต้องตั้งค่าเป้าหมายให้ตรงกับฟังก์ชันด้านบน
-  const targetIds = [
-    "U1371d5e9069bed92b46a0218c38d46bd",
-    // "Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  ];
+  const uid = "U1371d5e9069bed92b46a0218c38d46bd";
   const msg = "✅ ระบบ LINE OA เชื่อมต่อสำเร็จ\nระบบคัดกรองเบาหวานและความดันพร้อมใช้งาน";
 
   showLoad("กำลังทดสอบส่ง LINE...");
   try {
-    let successCount = 0;
-    for (const tid of targetIds) {
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'relay_line', token: tk, uid: tid, message: msg })
-      });
-      const data = await res.json();
-      if (data.status === 'success') successCount++;
-    }
+    // ส่งผ่าน Google Apps Script เพื่อเลี่ยงการถูกบล็อก CORS จากเบราว์เซอร์
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'relay_line', token: tk, uid: uid, message: msg })
+    });
+    const data = await res.json();
     hideLoad();
-    if (successCount > 0) {
-      showAlert(`ส่งข้อความทดสอบเข้า LINE สำเร็จ (${successCount} ปลายทาง)!`, 'success');
+    if (data.status === 'success') {
+      showAlert('ส่งข้อความทดสอบเข้า LINE สำเร็จ!', 'success');
     } else {
-      showAlert('ส่งไม่สำเร็จ: กรุณาตรวจสอบการตั้งค่า Token/UID', 'warning');
+      showAlert('ส่งไม่สำเร็จ: ' + data.message, 'warning');
     }
   } catch (e) {
     hideLoad();
