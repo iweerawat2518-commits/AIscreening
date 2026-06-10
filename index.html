@@ -664,7 +664,7 @@ select.finput{cursor:pointer}
         <div class="kpi-card c-gold">
           <div class="kpi-lbl"><i class="fa-solid fa-heart-pulse mr-1"></i>ความดันควบคุมได้</div>
           <div class="kpi-num" id="d-ht">0%</div>
-          <div class="kpi-badge">BP &lt; 120/80</div>
+          <div class="kpi-badge">BP &lt; 130/80</div>
           <i class="fa-solid fa-heart-pulse kpi-icon"></i>
         </div>
       </div>
@@ -1295,7 +1295,7 @@ function calcAll(p) {
       let score=100;
       if(bmi>=30) score-=15; else if(bmi>=25) score-=8;
       if(fbs>=126) score-=20; else if(fbs>=100) score-=10;
-      if(sys>=140||dia>=90) score-=20; else if(sys>=120||dia>=80) score-=10;
+      if(sys>=140||dia>=90) score-=20; else if(sys>=130||dia>=80) score-=10;
       if(smoke==='สูบปัจจุบัน') score-=12;
       if(cvd>4) score-=10; else if(cvd>2) score-=5;
       score=Math.max(20,score);
@@ -1334,10 +1334,10 @@ function calcStats(data) {
     let f=parseFloat(p.fbs),sys=0,dia=0;
     if(p.bp&&String(p.bp).includes('/')){let pts=String(p.bp).split('/');sys=parseInt(pts[0]);dia=parseInt(pts[1]);}
     let dmR=f>=126?'H':f>=100?'M':'L';
-    let htR=sys>=140||dia>=90?'H':sys>=120||dia>=80?'M':'L';
+    let htR=sys>=140||dia>=90?'H':sys>=130||dia>=80?'M':'L';
     if(dmR==='H'||htR==='H') s.hi++; else if(dmR==='M'||htR==='M') s.med++; else s.lo++;
     if(!isNaN(f)){s.dmT++;if(f<100)s.dmC++;}
-    if(sys>0){s.htT++;if(sys<120&&dia<80)s.htC++;}
+    if(sys>0){s.htT++;if(sys<130&&dia<80)s.htC++;}
     if(p.smoking&&String(p.smoking).includes('สูบปัจจุบัน')) s.smoke++;
     if(p.stress&&String(p.stress).includes('มาก')) s.stress++;
     let cvdH=p.cvd_risk&&String(p.cvd_risk).includes('สูง');
@@ -1455,7 +1455,7 @@ function renderDash(){
 
   const ctxHT=document.getElementById('htChart').getContext('2d');
   if(htC) htC.destroy();
-  let hH=0,hM=0,hL=0; d.forEach(p=>{if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);if(s2>=140||d2>=90)hH++;else if(s2>=120||d2>=80)hM++;else hL++;}});
+  let hH=0,hM=0,hL=0; d.forEach(p=>{if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);if(s2>=140||d2>=90)hH++;else if(s2>=130||d2>=80)hM++;else hL++;}});
   htC=new Chart(ctxHT,{type:'doughnut',data:{labels:['สงสัยสูง','กลุ่มเสี่ยง','ปกติ'],datasets:[{data:[hH,hM,hL],backgroundColor:dPalette,borderWidth:0}]},options:dOpts});
 
   const ctxM=document.getElementById('mooChart').getContext('2d');
@@ -1488,7 +1488,7 @@ function renderTbl(){
     const fbsCls=f>=126?'rb-hi':f>=100?'rb-mid':'rb-lo';
     const fbsLbl=f>=126?'สงสัยป่วย':f>=100?'กลุ่มเสี่ยง':'ปกติ';
     let bpCls='rb-lo',bpLbl='ปกติ';
-    if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);bpCls=s2>=140||d2>=90?'rb-hi':s2>=120||d2>=80?'rb-mid':'rb-lo';bpLbl=s2>=140||d2>=90?'สงสัยสูง':s2>=120||d2>=80?'เฝ้าระวัง':'ปกติ';}
+    if(p.bp&&p.bp.includes('/')){let[s2,d2]=p.bp.split('/').map(Number);bpCls=s2>=140||d2>=90?'rb-hi':s2>=130||d2>=80?'rb-mid':'rb-lo';bpLbl=s2>=140||d2>=90?'สงสัยสูง':s2>=130||d2>=80?'เฝ้าระวัง':'ปกติ';}
     const cvd=p.cvd_risk||'—';
     const cvdCls=cvd.includes('สูง')?'rb-hi':cvd.includes('กลาง')?'rb-mid':'rb-lo';
     const fullName = p.firstName ? `${p.firstName} ${p.lastName||''}`.trim() : (p.name || 'ไม่มีชื่อ');
