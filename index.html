@@ -259,6 +259,17 @@ select.finput{cursor:pointer}
 
 /* ─── Divider ─── */
 .sec-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:4px 0}
+
+/* ─── Futuristic AI Button ─── */
+.btn-futuristic-ai{transition:all .3s ease;border:1px solid transparent}
+.btn-futuristic-ai:hover{background:linear-gradient(135deg,rgba(0,255,255,.1),rgba(16,185,129,.1))!important;box-shadow:0 0 15px rgba(0,255,255,.3);border-color:rgba(0,255,255,.2)!important;}
+.btn-futuristic-ai.active{background:linear-gradient(135deg,rgba(0,255,255,.15),rgba(16,185,129,.15))!important;box-shadow:0 0 20px rgba(0,255,255,.4)!important;border:1px solid rgba(0,255,255,.3)!important;}
+.btn-futuristic-ai.active::after{background:#00ffff;box-shadow:0 0 10px #00ffff;}
+.ai-glow-text{color:#fff;font-weight:700;text-shadow:0 0 8px rgba(0,255,255,.5);font-family:'Prompt',sans-serif}
+.ai-highlight{color:#00ffff;text-shadow:0 0 12px #00ffff;font-weight:800}
+.bn-highlight{color:#10b981;text-shadow:0 0 10px rgba(16,185,129,.8);font-weight:700}
+.ai-icon-doc{color:#00ffff!important;filter:drop-shadow(0 0 5px #00ffff);animation:pulseGlow 2s infinite alternate}
+@keyframes pulseGlow{0%{filter:drop-shadow(0 0 3px #00ffff)}100%{filter:drop-shadow(0 0 12px #00ffff)}}
 </style>
 </head>
 <body>
@@ -298,7 +309,7 @@ select.finput{cursor:pointer}
     <button class="snav-btn hidden restricted-feature" id="btn-highrisk" onclick="switchTab('highrisk')"><span class="sicon"><i class="fa-solid fa-triangle-exclamation" style="color:#f87171"></i></span>กลุ่มเสี่ยงสูง</button>
     <button class="snav-btn hidden restricted-feature" id="btn-patients" onclick="switchTab('patients')"><span class="sicon"><i class="fa-solid fa-users"></i></span>รายชื่อผู้ป่วยทั้งหมด</button>
     <div class="snav-label" style="margin-top:4px">เครื่องมือ AI</div>
-    <button class="snav-btn" id="btn-chatbot" onclick="switchTab('chatbot')"><span class="sicon"><i class="fa-solid fa-robot" style="color:#c4b5fd"></i></span>AI Health Assistant</button>
+    <button class="snav-btn btn-futuristic-ai" id="btn-chatbot" onclick="switchTab('chatbot')"><span class="sicon"><i class="fa-solid fa-user-doctor ai-icon-doc"></i></span><span class="ai-glow-text">หมอ <span class="ai-highlight">AI</span> <span class="bn-highlight">บึงเนียม</span></span></button>
   </nav>
 
   <div class="sidebar-footer">
